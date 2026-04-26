@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { StarRating } from "@/components/StarRating";
+import { CityMiniMap } from "@/components/CityMiniMap";
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [city, setCity] = useState<string>("all");
+  const [specialty, setSpecialty] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("top");
 
   useEffect(() => {
