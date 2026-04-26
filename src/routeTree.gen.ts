@@ -9,38 +9,122 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SignupRouteImport } from './routes/signup'
+import { Route as MeRouteImport } from './routes/me'
+import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as WorkshopsNewRouteImport } from './routes/workshops.new'
+import { Route as WorkshopsSlugRouteImport } from './routes/workshops.$slug'
 
+const SignupRoute = SignupRouteImport.update({
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const LoginRoute = LoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkshopsNewRoute = WorkshopsNewRouteImport.update({
+  id: '/workshops/new',
+  path: '/workshops/new',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const WorkshopsSlugRoute = WorkshopsSlugRouteImport.update({
+  id: '/workshops/$slug',
+  path: '/workshops/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/me': typeof MeRoute
+  '/signup': typeof SignupRoute
+  '/workshops/$slug': typeof WorkshopsSlugRoute
+  '/workshops/new': typeof WorkshopsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/me': typeof MeRoute
+  '/signup': typeof SignupRoute
+  '/workshops/$slug': typeof WorkshopsSlugRoute
+  '/workshops/new': typeof WorkshopsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/login': typeof LoginRoute
+  '/me': typeof MeRoute
+  '/signup': typeof SignupRoute
+  '/workshops/$slug': typeof WorkshopsSlugRoute
+  '/workshops/new': typeof WorkshopsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/me'
+    | '/signup'
+    | '/workshops/$slug'
+    | '/workshops/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/login' | '/me' | '/signup' | '/workshops/$slug' | '/workshops/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/me'
+    | '/signup'
+    | '/workshops/$slug'
+    | '/workshops/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  LoginRoute: typeof LoginRoute
+  MeRoute: typeof MeRoute
+  SignupRoute: typeof SignupRoute
+  WorkshopsSlugRoute: typeof WorkshopsSlugRoute
+  WorkshopsNewRoute: typeof WorkshopsNewRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/signup': {
+      id: '/signup'
+      path: '/signup'
+      fullPath: '/signup'
+      preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/login': {
+      id: '/login'
+      path: '/login'
+      fullPath: '/login'
+      preLoaderRoute: typeof LoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +132,30 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workshops/new': {
+      id: '/workshops/new'
+      path: '/workshops/new'
+      fullPath: '/workshops/new'
+      preLoaderRoute: typeof WorkshopsNewRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/workshops/$slug': {
+      id: '/workshops/$slug'
+      path: '/workshops/$slug'
+      fullPath: '/workshops/$slug'
+      preLoaderRoute: typeof WorkshopsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  LoginRoute: LoginRoute,
+  MeRoute: MeRoute,
+  SignupRoute: SignupRoute,
+  WorkshopsSlugRoute: WorkshopsSlugRoute,
+  WorkshopsNewRoute: WorkshopsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
