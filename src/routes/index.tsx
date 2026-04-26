@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { StarRating } from "@/components/StarRating";
+import { CityMiniMap } from "@/components/CityMiniMap";
 import {
   Select,
   SelectContent,
@@ -41,6 +42,7 @@ function Home() {
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
   const [city, setCity] = useState<string>("all");
+  const [specialty, setSpecialty] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("top");
 
   useEffect(() => {
@@ -93,6 +95,12 @@ function Home() {
     return Array.from(new Set(workshops.map((w) => w.city))).sort();
   }, [workshops]);
 
+  const allSpecialties = useMemo(() => {
+    const set = new Set<string>();
+    workshops.forEach((w) => w.specialties.forEach((s) => set.add(s)));
+    return Array.from(set).sort();
+  }, [workshops]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let arr = workshops.filter((w) => {
@@ -102,7 +110,8 @@ function Home() {
         w.city.toLowerCase().includes(q) ||
         w.specialties.some((s) => s.toLowerCase().includes(q));
       const matchesCity = city === "all" || w.city === city;
-      return matchesQ && matchesCity;
+      const matchesSpecialty = specialty === "all" || w.specialties.includes(specialty);
+      return matchesQ && matchesCity && matchesSpecialty;
     });
     arr = [...arr].sort((a, b) => {
       switch (sort) {
@@ -118,13 +127,20 @@ function Home() {
       }
     });
     return arr;
-  }, [workshops, query, city, sort]);
+  }, [workshops, query, city, specialty, sort]);
+
+  // When the minimap detects the user's city, auto-apply it as a filter
+  // if it matches one of our known workshop cities.
+  const handleCityDetected = (detected: string) => {
+    const match = cities.find((c) => c.toLowerCase() === detected.toLowerCase());
+    if (match && city === "all") setCity(match);
+  };
 
   return (
     <main>
       {/* Hero */}
       <section className="relative overflow-hidden border-b border-border bg-gradient-to-b from-accent/40 via-background to-background">
-        <div className="container mx-auto px-4 py-14 sm:py-20">
+        <div className="container mx-auto grid gap-10 px-4 py-12 sm:py-16 lg:grid-cols-[1.2fr_1fr] lg:items-center lg:py-20">
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground shadow-sm">
               <ShieldAlert className="h-3.5 w-3.5 text-primary" />
@@ -155,6 +171,11 @@ function Home() {
               </Button>
             </div>
           </div>
+
+          {/* City minimap (only renders if user grants location) */}
+          <div className="lg:max-w-md lg:justify-self-end">
+            <CityMiniMap onCityDetected={handleCityDetected} />
+          </div>
         </div>
       </section>
 
@@ -164,7 +185,7 @@ function Home() {
           <h2 className="font-display text-2xl font-semibold">
             {loading ? "Loading…" : `${filtered.length} workshop${filtered.length === 1 ? "" : "s"}`}
           </h2>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Select value={city} onValueChange={setCity}>
               <SelectTrigger className="w-[140px]">
                 <SelectValue placeholder="City" />
@@ -174,6 +195,19 @@ function Home() {
                 {cities.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select value={specialty} onValueChange={setSpecialty}>
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Specialty" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All specialties</SelectItem>
+                {allSpecialties.map((s) => (
+                  <SelectItem key={s} value={s}>
+                    {s}
                   </SelectItem>
                 ))}
               </SelectContent>
