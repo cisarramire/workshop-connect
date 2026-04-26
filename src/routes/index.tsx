@@ -95,6 +95,12 @@ function Home() {
     return Array.from(new Set(workshops.map((w) => w.city))).sort();
   }, [workshops]);
 
+  const allSpecialties = useMemo(() => {
+    const set = new Set<string>();
+    workshops.forEach((w) => w.specialties.forEach((s) => set.add(s)));
+    return Array.from(set).sort();
+  }, [workshops]);
+
   const filtered = useMemo(() => {
     const q = query.trim().toLowerCase();
     let arr = workshops.filter((w) => {
@@ -104,7 +110,8 @@ function Home() {
         w.city.toLowerCase().includes(q) ||
         w.specialties.some((s) => s.toLowerCase().includes(q));
       const matchesCity = city === "all" || w.city === city;
-      return matchesQ && matchesCity;
+      const matchesSpecialty = specialty === "all" || w.specialties.includes(specialty);
+      return matchesQ && matchesCity && matchesSpecialty;
     });
     arr = [...arr].sort((a, b) => {
       switch (sort) {
@@ -120,7 +127,14 @@ function Home() {
       }
     });
     return arr;
-  }, [workshops, query, city, sort]);
+  }, [workshops, query, city, specialty, sort]);
+
+  // When the minimap detects the user's city, auto-apply it as a filter
+  // if it matches one of our known workshop cities.
+  const handleCityDetected = (detected: string) => {
+    const match = cities.find((c) => c.toLowerCase() === detected.toLowerCase());
+    if (match && city === "all") setCity(match);
+  };
 
   return (
     <main>
