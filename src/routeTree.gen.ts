@@ -10,13 +10,20 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as MeRouteImport } from './routes/me'
 import { Route as LoginRouteImport } from './routes/login'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as WorkshopsNewRouteImport } from './routes/workshops.new'
+import { Route as WorkshopsSlugRouteImport } from './routes/workshops.$slug'
 
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MeRoute = MeRouteImport.update({
+  id: '/me',
+  path: '/me',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LoginRoute = LoginRouteImport.update({
@@ -34,38 +41,64 @@ const WorkshopsNewRoute = WorkshopsNewRouteImport.update({
   path: '/workshops/new',
   getParentRoute: () => rootRouteImport,
 } as any)
+const WorkshopsSlugRoute = WorkshopsSlugRouteImport.update({
+  id: '/workshops/$slug',
+  path: '/workshops/$slug',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/me': typeof MeRoute
   '/signup': typeof SignupRoute
+  '/workshops/$slug': typeof WorkshopsSlugRoute
   '/workshops/new': typeof WorkshopsNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/me': typeof MeRoute
   '/signup': typeof SignupRoute
+  '/workshops/$slug': typeof WorkshopsSlugRoute
   '/workshops/new': typeof WorkshopsNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/login': typeof LoginRoute
+  '/me': typeof MeRoute
   '/signup': typeof SignupRoute
+  '/workshops/$slug': typeof WorkshopsSlugRoute
   '/workshops/new': typeof WorkshopsNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/login' | '/signup' | '/workshops/new'
+  fullPaths:
+    | '/'
+    | '/login'
+    | '/me'
+    | '/signup'
+    | '/workshops/$slug'
+    | '/workshops/new'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/login' | '/signup' | '/workshops/new'
-  id: '__root__' | '/' | '/login' | '/signup' | '/workshops/new'
+  to: '/' | '/login' | '/me' | '/signup' | '/workshops/$slug' | '/workshops/new'
+  id:
+    | '__root__'
+    | '/'
+    | '/login'
+    | '/me'
+    | '/signup'
+    | '/workshops/$slug'
+    | '/workshops/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   LoginRoute: typeof LoginRoute
+  MeRoute: typeof MeRoute
   SignupRoute: typeof SignupRoute
+  WorkshopsSlugRoute: typeof WorkshopsSlugRoute
   WorkshopsNewRoute: typeof WorkshopsNewRoute
 }
 
@@ -76,6 +109,13 @@ declare module '@tanstack/react-router' {
       path: '/signup'
       fullPath: '/signup'
       preLoaderRoute: typeof SignupRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/me': {
+      id: '/me'
+      path: '/me'
+      fullPath: '/me'
+      preLoaderRoute: typeof MeRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/login': {
@@ -99,15 +139,33 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof WorkshopsNewRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/workshops/$slug': {
+      id: '/workshops/$slug'
+      path: '/workshops/$slug'
+      fullPath: '/workshops/$slug'
+      preLoaderRoute: typeof WorkshopsSlugRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   LoginRoute: LoginRoute,
+  MeRoute: MeRoute,
   SignupRoute: SignupRoute,
+  WorkshopsSlugRoute: WorkshopsSlugRoute,
   WorkshopsNewRoute: WorkshopsNewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { createStart } from '@tanstack/react-start'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+  }
+}
