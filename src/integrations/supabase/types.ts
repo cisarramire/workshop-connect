@@ -14,7 +14,178 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          display_name: string
+          id: string
+          updated_at: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name: string
+          id: string
+          updated_at?: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          display_name?: string
+          id?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          created_at: string
+          id: string
+          reason: string
+          reporter_id: string
+          target_id: string
+          target_type: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          reason: string
+          reporter_id: string
+          target_id: string
+          target_type: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          reason?: string
+          reporter_id?: string
+          target_id?: string
+          target_type?: string
+        }
+        Relationships: []
+      }
+      review_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          review_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          review_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "review_comments_review_id_fkey"
+            columns: ["review_id"]
+            isOneToOne: false
+            referencedRelation: "reviews"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      reviews: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          rating: number
+          service_type: string | null
+          updated_at: string
+          workshop_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          rating: number
+          service_type?: string | null
+          updated_at?: string
+          workshop_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          rating?: number
+          service_type?: string | null
+          updated_at?: string
+          workshop_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reviews_workshop_id_fkey"
+            columns: ["workshop_id"]
+            isOneToOne: false
+            referencedRelation: "workshops"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workshops: {
+        Row: {
+          address: string | null
+          city: string
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          name: string
+          phone: string | null
+          photo_url: string | null
+          slug: string
+          specialties: string[]
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          address?: string | null
+          city: string
+          created_at?: string
+          created_by: string
+          description: string
+          id?: string
+          name: string
+          phone?: string | null
+          photo_url?: string | null
+          slug: string
+          specialties?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          name?: string
+          phone?: string | null
+          photo_url?: string | null
+          slug?: string
+          specialties?: string[]
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
