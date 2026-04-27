@@ -21,7 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { StarRating } from "@/components/StarRating";
-import { PhotoGallery } from "@/components/PhotoGallery";
+import { PhotoGallery, Lightbox } from "@/components/PhotoGallery";
 import {
   AlertDialog,
   AlertDialogAction,
