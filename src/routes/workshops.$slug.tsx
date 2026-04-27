@@ -354,7 +354,7 @@ function WorkshopDetail() {
             )}
             {gallery.length > 1 && (
               <div className="border-t border-border p-3">
-                <PhotoGallery photos={gallery} alt={workshop.name} />
+                <PhotoGallery photos={gallery} alt={workshop.name} onOpen={(i) => setLightboxStart(i)} />
               </div>
             )}
             {stats.count > 0 && (
