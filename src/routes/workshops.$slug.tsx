@@ -127,6 +127,8 @@ function WorkshopDetail() {
   const [workshop, setWorkshop] = useState<Workshop | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [replyComments, setReplyComments] = useState<ReplyComment[]>([]);
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
   const [loading, setLoading] = useState(true);
 
@@ -152,21 +154,45 @@ function WorkshopDetail() {
 
     const reviewIds = reviewList.map((r) => r.id);
     let commentList: Comment[] = [];
+    let replyList: Reply[] = [];
+    let replyCommentList: ReplyComment[] = [];
     if (reviewIds.length) {
-      const { data: cs } = await supabase
-        .from("review_comments")
-        .select("*")
-        .in("review_id", reviewIds)
-        .order("created_at", { ascending: true });
+      const [{ data: cs }, { data: rps }] = await Promise.all([
+        supabase
+          .from("review_comments")
+          .select("*")
+          .in("review_id", reviewIds)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("review_replies")
+          .select("*")
+          .in("review_id", reviewIds)
+          .order("created_at", { ascending: true }),
+      ]);
       commentList = (cs ?? []) as Comment[];
+      replyList = (rps ?? []) as Reply[];
+
+      const replyIds = replyList.map((r) => r.id);
+      if (replyIds.length) {
+        const { data: rcs } = await supabase
+          .from("reply_comments")
+          .select("*")
+          .in("reply_id", replyIds)
+          .order("created_at", { ascending: true });
+        replyCommentList = (rcs ?? []) as ReplyComment[];
+      }
     }
     setComments(commentList);
+    setReplies(replyList);
+    setReplyComments(replyCommentList);
 
     const ids = Array.from(
       new Set([
         w.created_by,
         ...reviewList.map((r) => r.author_id),
         ...commentList.map((c) => c.author_id),
+        ...replyList.map((r) => r.author_id),
+        ...replyCommentList.map((c) => c.author_id),
       ]),
     );
     if (ids.length) {
