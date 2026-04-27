@@ -416,7 +416,11 @@ function WorkshopDetail() {
               <ReviewItem
                 key={r.id}
                 review={r}
+                workshopId={workshop.id}
+                isOwner={isOwner}
                 comments={comments.filter((c) => c.review_id === r.id)}
+                reply={replies.find((rep) => rep.review_id === r.id) ?? null}
+                replyComments={replyComments}
                 profiles={profiles}
                 onChange={loadAll}
               />
