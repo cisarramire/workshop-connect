@@ -55,8 +55,8 @@ function NewWorkshop() {
   const [website, setWebsite] = useState("");
   const [description, setDescription] = useState("");
   const [specialties, setSpecialties] = useState<string[]>([]);
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [duplicate, setDuplicate] = useState<{ slug: string; name: string } | null>(null);
 
