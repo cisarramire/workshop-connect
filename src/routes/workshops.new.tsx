@@ -128,16 +128,19 @@ function NewWorkshop() {
       }
 
       let photo_url: string | null = null;
-      if (photo) {
-        const ext = photo.name.split(".").pop()?.toLowerCase() ?? "jpg";
-        const path = `${user.id}/${slug}-${Date.now()}.${ext}`;
+      const uploaded: string[] = [];
+      for (let i = 0; i < photos.length; i++) {
+        const f = photos[i];
+        const ext = f.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const path = `${user.id}/${slug}-${Date.now()}-${i}.${ext}`;
         const { error: upErr } = await supabase.storage
           .from("workshop-photos")
-          .upload(path, photo, { upsert: false, contentType: photo.type });
+          .upload(path, f, { upsert: false, contentType: f.type });
         if (upErr) throw upErr;
         const { data: pub } = supabase.storage.from("workshop-photos").getPublicUrl(path);
-        photo_url = pub.publicUrl;
+        uploaded.push(pub.publicUrl);
       }
+      if (uploaded.length) photo_url = uploaded[0];
 
       const { error } = await supabase.from("workshops").insert({
         created_by: user.id,
@@ -149,6 +152,7 @@ function NewWorkshop() {
         website: parsed.data.website || null,
         description: parsed.data.description,
         photo_url,
+        photos: uploaded,
         specialties,
       });
       if (error) throw error;
