@@ -84,9 +84,18 @@ function NewWorkshop() {
   }, [name]);
 
   const onPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
-    setPhoto(f);
-    setPhotoPreview(f ? URL.createObjectURL(f) : null);
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setPhotos((prev) => [...prev, ...files].slice(0, 8));
+    setPhotoPreviews((prev) =>
+      [...prev, ...files.map((f) => URL.createObjectURL(f))].slice(0, 8),
+    );
+    e.target.value = "";
+  };
+
+  const removePhoto = (idx: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== idx));
+    setPhotoPreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const toggleSpecialty = (s: string) => {
