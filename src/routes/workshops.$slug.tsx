@@ -330,15 +330,31 @@ function WorkshopDetail() {
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-            {workshop.photo_url ? (
-              <img src={workshop.photo_url} alt={workshop.name} className="h-full w-full object-cover" />
+            {gallery.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setLightboxStart(0)}
+                className="block w-full focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-label="Open photo gallery"
+              >
+                <img
+                  src={gallery[0]}
+                  alt={workshop.name}
+                  className="h-full w-full cursor-zoom-in object-cover transition-transform duration-300 hover:scale-[1.02]"
+                />
+              </button>
             ) : (
               <div className="flex aspect-[4/3] items-center justify-center bg-accent text-primary/40">
                 <Wrench className="h-20 w-20" />
               </div>
             )}
+            {gallery.length > 1 && (
+              <div className="border-t border-border p-3">
+                <PhotoGallery photos={gallery} alt={workshop.name} />
+              </div>
+            )}
             {stats.count > 0 && (
-              <div className="space-y-1.5 p-5">
+              <div className="space-y-1.5 border-t border-border p-5">
                 {[5, 4, 3, 2, 1].map((n) => {
                   const c = stats.breakdown[n - 1];
                   const pct = stats.count ? (c / stats.count) * 100 : 0;
@@ -355,6 +371,14 @@ function WorkshopDetail() {
               </div>
             )}
           </div>
+          {lightboxStart !== null && (
+            <FullscreenLightbox
+              photos={gallery}
+              startIndex={lightboxStart}
+              alt={workshop.name}
+              onClose={() => setLightboxStart(null)}
+            />
+          )}
         </div>
       </section>
 
