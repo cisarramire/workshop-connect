@@ -376,7 +376,7 @@ function WorkshopDetail() {
             )}
           </div>
           {lightboxStart !== null && (
-            <FullscreenLightbox
+            <Lightbox
               photos={gallery}
               startIndex={lightboxStart}
               alt={workshop.name}
