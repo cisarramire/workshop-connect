@@ -72,6 +72,7 @@ type Workshop = {
   website: string | null;
   description: string;
   photo_url: string | null;
+  photos: string[];
   specialties: string[];
 };
 
@@ -90,6 +91,23 @@ type Review = {
 type Comment = {
   id: string;
   review_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
+type Reply = {
+  id: string;
+  review_id: string;
+  workshop_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
+type ReplyComment = {
+  id: string;
+  reply_id: string;
   author_id: string;
   body: string;
   created_at: string;
