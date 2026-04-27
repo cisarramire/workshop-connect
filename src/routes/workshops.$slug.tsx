@@ -238,6 +238,9 @@ function WorkshopDetail() {
   }
 
   const owner = profiles.get(workshop.created_by);
+  const galleryRaw = workshop.photos?.length ? workshop.photos : workshop.photo_url ? [workshop.photo_url] : [];
+  const gallery = Array.from(new Set(galleryRaw.filter(Boolean)));
+  const isOwner = user?.id === workshop.created_by;
 
   const deleteWorkshop = async () => {
     const { error } = await supabase.from("workshops").delete().eq("id", workshop.id);
