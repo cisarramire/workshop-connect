@@ -55,8 +55,8 @@ function NewWorkshop() {
   const [website, setWebsite] = useState("");
   const [description, setDescription] = useState("");
   const [specialties, setSpecialties] = useState<string[]>([]);
-  const [photo, setPhoto] = useState<File | null>(null);
-  const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+  const [photos, setPhotos] = useState<File[]>([]);
+  const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
   const [busy, setBusy] = useState(false);
   const [duplicate, setDuplicate] = useState<{ slug: string; name: string } | null>(null);
 
@@ -84,9 +84,18 @@ function NewWorkshop() {
   }, [name]);
 
   const onPhotoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const f = e.target.files?.[0] ?? null;
-    setPhoto(f);
-    setPhotoPreview(f ? URL.createObjectURL(f) : null);
+    const files = Array.from(e.target.files ?? []);
+    if (!files.length) return;
+    setPhotos((prev) => [...prev, ...files].slice(0, 8));
+    setPhotoPreviews((prev) =>
+      [...prev, ...files.map((f) => URL.createObjectURL(f))].slice(0, 8),
+    );
+    e.target.value = "";
+  };
+
+  const removePhoto = (idx: number) => {
+    setPhotos((prev) => prev.filter((_, i) => i !== idx));
+    setPhotoPreviews((prev) => prev.filter((_, i) => i !== idx));
   };
 
   const toggleSpecialty = (s: string) => {
@@ -119,16 +128,19 @@ function NewWorkshop() {
       }
 
       let photo_url: string | null = null;
-      if (photo) {
-        const ext = photo.name.split(".").pop()?.toLowerCase() ?? "jpg";
-        const path = `${user.id}/${slug}-${Date.now()}.${ext}`;
+      const uploaded: string[] = [];
+      for (let i = 0; i < photos.length; i++) {
+        const f = photos[i];
+        const ext = f.name.split(".").pop()?.toLowerCase() ?? "jpg";
+        const path = `${user.id}/${slug}-${Date.now()}-${i}.${ext}`;
         const { error: upErr } = await supabase.storage
           .from("workshop-photos")
-          .upload(path, photo, { upsert: false, contentType: photo.type });
+          .upload(path, f, { upsert: false, contentType: f.type });
         if (upErr) throw upErr;
         const { data: pub } = supabase.storage.from("workshop-photos").getPublicUrl(path);
-        photo_url = pub.publicUrl;
+        uploaded.push(pub.publicUrl);
       }
+      if (uploaded.length) photo_url = uploaded[0];
 
       const { error } = await supabase.from("workshops").insert({
         created_by: user.id,
@@ -140,6 +152,7 @@ function NewWorkshop() {
         website: parsed.data.website || null,
         description: parsed.data.description,
         photo_url,
+        photos: uploaded,
         specialties,
       });
       if (error) throw error;
@@ -246,28 +259,44 @@ function NewWorkshop() {
         </div>
 
         <div className="space-y-2">
-          <Label>Photo</Label>
-          {photoPreview ? (
-            <div className="relative inline-block overflow-hidden rounded-xl border border-border">
-              <img src={photoPreview} alt="preview" className="h-40 w-auto object-cover" />
-              <button
-                type="button"
-                onClick={() => {
-                  setPhoto(null);
-                  setPhotoPreview(null);
-                }}
-                className="absolute right-2 top-2 rounded-full bg-background/90 p-1 shadow"
+          <Label>Photos <span className="text-xs text-muted-foreground">(up to 8)</span></Label>
+          <div className="flex flex-wrap gap-3">
+            {photoPreviews.map((src, idx) => (
+              <div
+                key={src}
+                className="relative overflow-hidden rounded-xl border border-border"
               >
-                <X className="h-4 w-4" />
-              </button>
-            </div>
-          ) : (
-            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-dashed border-border bg-card/40 px-6 py-10 text-sm text-muted-foreground transition-colors hover:border-primary hover:text-primary">
-              <ImagePlus className="h-5 w-5" />
-              Upload a photo
-              <input type="file" accept="image/*" className="hidden" onChange={onPhotoChange} />
-            </label>
-          )}
+                <img src={src} alt={`preview ${idx + 1}`} className="h-32 w-32 object-cover" />
+                {idx === 0 && (
+                  <span className="absolute left-1.5 top-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
+                    Cover
+                  </span>
+                )}
+                <button
+                  type="button"
+                  onClick={() => removePhoto(idx)}
+                  className="absolute right-1.5 top-1.5 rounded-full bg-background/90 p-1 shadow"
+                  aria-label="Remove photo"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </div>
+            ))}
+            {photoPreviews.length < 8 && (
+              <label className="flex h-32 w-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-card/40 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary">
+                <ImagePlus className="h-5 w-5" />
+                Add photo
+                <input
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  className="hidden"
+                  onChange={onPhotoChange}
+                />
+              </label>
+            )}
+          </div>
+          <p className="text-xs text-muted-foreground">First photo is used as the cover.</p>
         </div>
 
         <div className="flex items-center gap-3 pt-2">

@@ -38,6 +38,30 @@ export type Database = {
         }
         Relationships: []
       }
+      reply_comments: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          reply_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          reply_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          reply_id?: string
+        }
+        Relationships: []
+      }
       reports: {
         Row: {
           created_at: string
@@ -97,6 +121,36 @@ export type Database = {
           },
         ]
       }
+      review_replies: {
+        Row: {
+          author_id: string
+          body: string
+          created_at: string
+          id: string
+          review_id: string
+          updated_at: string
+          workshop_id: string
+        }
+        Insert: {
+          author_id: string
+          body: string
+          created_at?: string
+          id?: string
+          review_id: string
+          updated_at?: string
+          workshop_id: string
+        }
+        Update: {
+          author_id?: string
+          body?: string
+          created_at?: string
+          id?: string
+          review_id?: string
+          updated_at?: string
+          workshop_id?: string
+        }
+        Relationships: []
+      }
       reviews: {
         Row: {
           author_id: string
@@ -149,6 +203,7 @@ export type Database = {
           name: string
           phone: string | null
           photo_url: string | null
+          photos: string[]
           slug: string
           specialties: string[]
           updated_at: string
@@ -164,6 +219,7 @@ export type Database = {
           name: string
           phone?: string | null
           photo_url?: string | null
+          photos?: string[]
           slug: string
           specialties?: string[]
           updated_at?: string
@@ -179,6 +235,7 @@ export type Database = {
           name?: string
           phone?: string | null
           photo_url?: string | null
+          photos?: string[]
           slug?: string
           specialties?: string[]
           updated_at?: string

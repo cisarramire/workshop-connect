@@ -21,6 +21,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { StarRating } from "@/components/StarRating";
+import { PhotoGallery, Lightbox } from "@/components/PhotoGallery";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -71,6 +72,7 @@ type Workshop = {
   website: string | null;
   description: string;
   photo_url: string | null;
+  photos: string[];
   specialties: string[];
 };
 
@@ -94,6 +96,23 @@ type Comment = {
   created_at: string;
 };
 
+type Reply = {
+  id: string;
+  review_id: string;
+  workshop_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
+type ReplyComment = {
+  id: string;
+  reply_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
 const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   service_type: z.string().trim().max(40).optional().or(z.literal("")),
@@ -108,8 +127,11 @@ function WorkshopDetail() {
   const [workshop, setWorkshop] = useState<Workshop | null>(null);
   const [reviews, setReviews] = useState<Review[]>([]);
   const [comments, setComments] = useState<Comment[]>([]);
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [replyComments, setReplyComments] = useState<ReplyComment[]>([]);
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [lightboxStart, setLightboxStart] = useState<number | null>(null);
 
   const loadAll = useCallback(async () => {
     const { data: w } = await supabase
@@ -133,21 +155,45 @@ function WorkshopDetail() {
 
     const reviewIds = reviewList.map((r) => r.id);
     let commentList: Comment[] = [];
+    let replyList: Reply[] = [];
+    let replyCommentList: ReplyComment[] = [];
     if (reviewIds.length) {
-      const { data: cs } = await supabase
-        .from("review_comments")
-        .select("*")
-        .in("review_id", reviewIds)
-        .order("created_at", { ascending: true });
+      const [{ data: cs }, { data: rps }] = await Promise.all([
+        supabase
+          .from("review_comments")
+          .select("*")
+          .in("review_id", reviewIds)
+          .order("created_at", { ascending: true }),
+        supabase
+          .from("review_replies")
+          .select("*")
+          .in("review_id", reviewIds)
+          .order("created_at", { ascending: true }),
+      ]);
       commentList = (cs ?? []) as Comment[];
+      replyList = (rps ?? []) as Reply[];
+
+      const replyIds = replyList.map((r) => r.id);
+      if (replyIds.length) {
+        const { data: rcs } = await supabase
+          .from("reply_comments")
+          .select("*")
+          .in("reply_id", replyIds)
+          .order("created_at", { ascending: true });
+        replyCommentList = (rcs ?? []) as ReplyComment[];
+      }
     }
     setComments(commentList);
+    setReplies(replyList);
+    setReplyComments(replyCommentList);
 
     const ids = Array.from(
       new Set([
         w.created_by,
         ...reviewList.map((r) => r.author_id),
         ...commentList.map((c) => c.author_id),
+        ...replyList.map((r) => r.author_id),
+        ...replyCommentList.map((c) => c.author_id),
       ]),
     );
     if (ids.length) {
@@ -192,6 +238,9 @@ function WorkshopDetail() {
   }
 
   const owner = profiles.get(workshop.created_by);
+  const galleryRaw = workshop.photos?.length ? workshop.photos : workshop.photo_url ? [workshop.photo_url] : [];
+  const gallery = Array.from(new Set(galleryRaw.filter(Boolean)));
+  const isOwner = user?.id === workshop.created_by;
 
   const deleteWorkshop = async () => {
     const { error } = await supabase.from("workshops").delete().eq("id", workshop.id);
@@ -285,15 +334,31 @@ function WorkshopDetail() {
           </div>
 
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-            {workshop.photo_url ? (
-              <img src={workshop.photo_url} alt={workshop.name} className="h-full w-full object-cover" />
+            {gallery.length > 0 ? (
+              <button
+                type="button"
+                onClick={() => setLightboxStart(0)}
+                className="block w-full focus:outline-none focus:ring-2 focus:ring-primary"
+                aria-label="Open photo gallery"
+              >
+                <img
+                  src={gallery[0]}
+                  alt={workshop.name}
+                  className="h-full w-full cursor-zoom-in object-cover transition-transform duration-300 hover:scale-[1.02]"
+                />
+              </button>
             ) : (
               <div className="flex aspect-[4/3] items-center justify-center bg-accent text-primary/40">
                 <Wrench className="h-20 w-20" />
               </div>
             )}
+            {gallery.length > 1 && (
+              <div className="border-t border-border p-3">
+                <PhotoGallery photos={gallery} alt={workshop.name} onOpen={(i) => setLightboxStart(i)} />
+              </div>
+            )}
             {stats.count > 0 && (
-              <div className="space-y-1.5 p-5">
+              <div className="space-y-1.5 border-t border-border p-5">
                 {[5, 4, 3, 2, 1].map((n) => {
                   const c = stats.breakdown[n - 1];
                   const pct = stats.count ? (c / stats.count) * 100 : 0;
@@ -310,6 +375,14 @@ function WorkshopDetail() {
               </div>
             )}
           </div>
+          {lightboxStart !== null && (
+            <Lightbox
+              photos={gallery}
+              startIndex={lightboxStart}
+              alt={workshop.name}
+              onClose={() => setLightboxStart(null)}
+            />
+          )}
         </div>
       </section>
 
@@ -343,7 +416,11 @@ function WorkshopDetail() {
               <ReviewItem
                 key={r.id}
                 review={r}
+                workshopId={workshop.id}
+                isOwner={isOwner}
                 comments={comments.filter((c) => c.review_id === r.id)}
+                reply={replies.find((rep) => rep.review_id === r.id) ?? null}
+                replyComments={replyComments}
                 profiles={profiles}
                 onChange={loadAll}
               />
@@ -448,12 +525,20 @@ function ReviewForm({
 
 function ReviewItem({
   review,
+  workshopId,
+  isOwner,
   comments,
+  reply,
+  replyComments,
   profiles,
   onChange,
 }: {
   review: Review;
+  workshopId: string;
+  isOwner: boolean;
   comments: Comment[];
+  reply: Reply | null;
+  replyComments: ReplyComment[];
   profiles: Map<string, Profile>;
   onChange: () => void;
 }) {
@@ -520,7 +605,7 @@ function ReviewItem({
                 onClick={() => setShowComment((v) => !v)}
               >
                 <MessageSquare className="h-3.5 w-3.5" />
-                Reply
+                Comment
               </Button>
             )}
             <ReportButton targetType="review" targetId={review.id} />
@@ -531,7 +616,7 @@ function ReviewItem({
               <Input
                 value={commentBody}
                 onChange={(e) => setCommentBody(e.target.value)}
-                placeholder="Add a reply…"
+                placeholder="Add a comment…"
                 maxLength={1000}
               />
               <Button type="submit" size="icon" disabled={busy}>
@@ -567,9 +652,254 @@ function ReviewItem({
               })}
             </ul>
           )}
+
+          {/* Owner reply block */}
+          <OwnerReplyBlock
+            reviewId={review.id}
+            workshopId={workshopId}
+            isOwner={isOwner}
+            reply={reply}
+            replyComments={replyComments.filter((rc) => reply && rc.reply_id === reply.id)}
+            profiles={profiles}
+            onChange={onChange}
+          />
         </div>
       </div>
     </li>
+  );
+}
+
+function OwnerReplyBlock({
+  reviewId,
+  workshopId,
+  isOwner,
+  reply,
+  replyComments,
+  profiles,
+  onChange,
+}: {
+  reviewId: string;
+  workshopId: string;
+  isOwner: boolean;
+  reply: Reply | null;
+  replyComments: ReplyComment[];
+  profiles: Map<string, Profile>;
+  onChange: () => void;
+}) {
+  const { user } = useAuth();
+  const [editing, setEditing] = useState(false);
+  const [body, setBody] = useState(reply?.body ?? "");
+  const [busy, setBusy] = useState(false);
+  const [showComment, setShowComment] = useState(false);
+  const [commentBody, setCommentBody] = useState("");
+
+  useEffect(() => {
+    setBody(reply?.body ?? "");
+  }, [reply]);
+
+  const author = reply ? profiles.get(reply.author_id) : null;
+
+  const saveReply = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+    const text = body.trim();
+    if (text.length < 2 || text.length > 2000) {
+      return toast.error("Reply must be 2–2000 characters");
+    }
+    setBusy(true);
+    const { error } = reply
+      ? await supabase.from("review_replies").update({ body: text }).eq("id", reply.id)
+      : await supabase.from("review_replies").insert({
+          review_id: reviewId,
+          workshop_id: workshopId,
+          author_id: user.id,
+          body: text,
+        });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    toast.success(reply ? "Reply updated" : "Reply posted");
+    setEditing(false);
+    onChange();
+  };
+
+  const deleteReply = async () => {
+    if (!reply) return;
+    const { error } = await supabase.from("review_replies").delete().eq("id", reply.id);
+    if (error) return toast.error(error.message);
+    toast.success("Reply removed");
+    onChange();
+  };
+
+  const postReplyComment = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user || !reply) return;
+    const text = commentBody.trim();
+    if (text.length < 1 || text.length > 1000) {
+      return toast.error("Comment must be 1–1000 characters");
+    }
+    setBusy(true);
+    const { error } = await supabase.from("reply_comments").insert({
+      reply_id: reply.id,
+      author_id: user.id,
+      body: text,
+    });
+    setBusy(false);
+    if (error) return toast.error(error.message);
+    setCommentBody("");
+    setShowComment(false);
+    onChange();
+  };
+
+  const deleteReplyComment = async (id: string) => {
+    const { error } = await supabase.from("reply_comments").delete().eq("id", id);
+    if (error) return toast.error(error.message);
+    onChange();
+  };
+
+  // Nothing to show: not owner and no existing reply
+  if (!reply && !isOwner) return null;
+
+  return (
+    <div className="mt-5 rounded-xl border border-primary/30 bg-primary/5 p-4">
+      {reply && !editing && (
+        <>
+          <div className="flex items-start gap-2.5">
+            <Avatar className="h-7 w-7">
+              <AvatarImage src={author?.avatar_url ?? undefined} />
+              <AvatarFallback className="text-xs">
+                {(author?.display_name ?? "?").slice(0, 1).toUpperCase()}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-sm font-medium">{author?.display_name ?? "Owner"}</span>
+                <Badge className="h-5 bg-primary px-2 text-[10px] font-medium uppercase tracking-wide">
+                  Owner
+                </Badge>
+                <span className="text-xs text-muted-foreground">
+                  {new Date(reply.created_at).toLocaleDateString()}
+                </span>
+              </div>
+              <p className="mt-1.5 whitespace-pre-line text-sm text-foreground/90">{reply.body}</p>
+
+              <div className="mt-2 flex items-center gap-2">
+                {user && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-7 gap-1 text-xs"
+                    onClick={() => setShowComment((v) => !v)}
+                  >
+                    <MessageSquare className="h-3.5 w-3.5" />
+                    Comment
+                  </Button>
+                )}
+                {isOwner && user?.id === reply.author_id && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 gap-1 text-xs"
+                      onClick={() => setEditing(true)}
+                    >
+                      <Pencil className="h-3.5 w-3.5" /> Edit
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-7 gap-1 text-xs text-destructive hover:text-destructive"
+                      onClick={deleteReply}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                    </Button>
+                  </>
+                )}
+              </div>
+
+              {showComment && (
+                <form onSubmit={postReplyComment} className="mt-3 flex gap-2">
+                  <Input
+                    value={commentBody}
+                    onChange={(e) => setCommentBody(e.target.value)}
+                    placeholder="Comment on the owner's reply…"
+                    maxLength={1000}
+                  />
+                  <Button type="submit" size="icon" disabled={busy}>
+                    <Send className="h-4 w-4" />
+                  </Button>
+                </form>
+              )}
+
+              {replyComments.length > 0 && (
+                <ul className="mt-3 space-y-2.5 border-l-2 border-primary/30 pl-3">
+                  {replyComments.map((c) => {
+                    const a = profiles.get(c.author_id);
+                    return (
+                      <li key={c.id} className="text-sm">
+                        <div className="flex items-center gap-2">
+                          <span className="font-medium">{a?.display_name ?? "Someone"}</span>
+                          <span className="text-xs text-muted-foreground">
+                            {new Date(c.created_at).toLocaleDateString()}
+                          </span>
+                          {user?.id === c.author_id && (
+                            <button
+                              onClick={() => deleteReplyComment(c.id)}
+                              className="text-xs text-muted-foreground hover:text-destructive"
+                              aria-label="Delete comment"
+                            >
+                              <Trash2 className="h-3 w-3" />
+                            </button>
+                          )}
+                        </div>
+                        <p className="mt-1 whitespace-pre-line text-foreground/90">{c.body}</p>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+            </div>
+          </div>
+        </>
+      )}
+
+      {(editing || (!reply && isOwner)) && (
+        <form onSubmit={saveReply} className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Badge className="h-5 bg-primary px-2 text-[10px] font-medium uppercase tracking-wide">
+              Owner reply
+            </Badge>
+            <span className="text-xs text-muted-foreground">
+              Public response visible to all visitors
+            </span>
+          </div>
+          <Textarea
+            rows={3}
+            value={body}
+            onChange={(e) => setBody(e.target.value)}
+            placeholder="Thank the customer, clarify, or address concerns…"
+            maxLength={2000}
+          />
+          <div className="flex items-center gap-2">
+            <Button type="submit" size="sm" disabled={busy}>
+              {busy ? "Saving…" : reply ? "Save reply" : "Post reply"}
+            </Button>
+            {reply && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                onClick={() => {
+                  setEditing(false);
+                  setBody(reply.body);
+                }}
+              >
+                Cancel
+              </Button>
+            )}
+          </div>
+        </form>
+      )}
+    </div>
   );
 }
 
