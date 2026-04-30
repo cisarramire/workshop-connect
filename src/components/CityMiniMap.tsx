@@ -39,7 +39,6 @@ export function CityMiniMap({ onCityDetected }: Props) {
         import("leaflet"),
       ]);
       if (cancelled) return;
-      // Fix default marker icon URLs (they break under bundlers).
       const icon = new L.Icon({
         iconUrl:
           "https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png",
@@ -78,10 +77,9 @@ export function CityMiniMap({ onCityDetected }: Props) {
         const lon = pos.coords.longitude;
         setCoords({ lat, lon });
         setStatus("granted");
-        // Reverse geocode (best-effort, no key needed)
         try {
           const res = await fetch(
-            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1`,
+            `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&zoom=10&addressdetails=1&accept-language=es`,
             { headers: { Accept: "application/json" } },
           );
           if (res.ok) {
@@ -116,13 +114,13 @@ export function CityMiniMap({ onCityDetected }: Props) {
           <MapPin className="h-5 w-5" />
         </div>
         <div className="flex-1">
-          <p className="text-sm font-semibold">See workshops near you</p>
+          <p className="text-sm font-semibold">Ver talleres cerca de ti</p>
           <p className="text-xs text-muted-foreground">
-            Allow location to see your city on the map.
+            Permite la ubicación para ver tu ciudad en el mapa.
           </p>
         </div>
         <Button size="sm" variant="outline" onClick={requestLocation}>
-          Show map
+          Mostrar mapa
         </Button>
       </div>
     );
@@ -132,7 +130,7 @@ export function CityMiniMap({ onCityDetected }: Props) {
     return (
       <div className="flex items-center gap-3 rounded-2xl border border-border bg-card/80 p-4 shadow-[var(--shadow-card)] backdrop-blur">
         <Loader2 className="h-5 w-5 animate-spin text-primary" />
-        <p className="text-sm text-muted-foreground">Locating you…</p>
+        <p className="text-sm text-muted-foreground">Localizándote…</p>
       </div>
     );
   }
@@ -145,10 +143,10 @@ export function CityMiniMap({ onCityDetected }: Props) {
         <p className="text-sm font-medium">
           {city ? (
             <>
-              Workshops near <span className="text-primary">{city}</span>
+              Talleres cerca de <span className="text-primary">{city}</span>
             </>
           ) : (
-            "Your location"
+            "Tu ubicación"
           )}
         </p>
       </div>
@@ -169,7 +167,7 @@ export function CityMiniMap({ onCityDetected }: Props) {
               position={[coords.lat, coords.lon]}
               icon={defaultIcon as InstanceType<typeof bits.icon>}
             >
-              <bits.Popup>You're here</bits.Popup>
+              <bits.Popup>Estás aquí</bits.Popup>
             </bits.Marker>
           </bits.MapContainer>
         ) : (

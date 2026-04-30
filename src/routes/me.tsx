@@ -13,7 +13,7 @@ import { StarRating } from "@/components/StarRating";
 
 export const Route = createFileRoute("/me")({
   head: () => ({
-    meta: [{ title: "My account — WrenchRate" }],
+    meta: [{ title: "Mi cuenta — MecaRate" }],
   }),
   component: MePage,
 });
@@ -79,13 +79,13 @@ function MePage() {
   }, [user]);
 
   if (loading || !user) {
-    return <main className="container mx-auto px-4 py-20 text-center text-muted-foreground">Loading…</main>;
+    return <main className="container mx-auto px-4 py-20 text-center text-muted-foreground">Cargando…</main>;
   }
 
   const saveProfile = async (e: FormEvent) => {
     e.preventDefault();
     const trimmed = name.trim();
-    if (trimmed.length < 2 || trimmed.length > 50) return toast.error("Name must be 2–50 chars");
+    if (trimmed.length < 2 || trimmed.length > 50) return toast.error("El nombre debe tener 2–50 caracteres");
     setBusy(true);
     const { error } = await supabase
       .from("profiles")
@@ -93,7 +93,7 @@ function MePage() {
       .eq("id", user.id);
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Profile updated");
+    toast.success("Perfil actualizado");
     setEditing(false);
     refreshProfile();
   };
@@ -112,15 +112,15 @@ function MePage() {
             <form onSubmit={saveProfile} className="flex items-end gap-2">
               <div className="flex-1">
                 <Label htmlFor="name" className="text-xs">
-                  Display name
+                  Nombre para mostrar
                 </Label>
                 <Input id="name" value={name} onChange={(e) => setName(e.target.value)} maxLength={50} />
               </div>
               <Button type="submit" disabled={busy}>
-                Save
+                Guardar
               </Button>
               <Button type="button" variant="ghost" onClick={() => setEditing(false)}>
-                Cancel
+                Cancelar
               </Button>
             </form>
           ) : (
@@ -132,21 +132,21 @@ function MePage() {
         </div>
         {!editing && (
           <Button variant="outline" size="sm" onClick={() => setEditing(true)}>
-            <Pencil className="mr-1.5 h-4 w-4" /> Edit
+            <Pencil className="mr-1.5 h-4 w-4" /> Editar
           </Button>
         )}
       </div>
 
       <Tabs defaultValue="workshops" className="mt-10">
         <TabsList>
-          <TabsTrigger value="workshops">Workshops ({workshops.length})</TabsTrigger>
-          <TabsTrigger value="reviews">Reviews ({reviews.length})</TabsTrigger>
-          <TabsTrigger value="comments">Comments ({comments.length})</TabsTrigger>
+          <TabsTrigger value="workshops">Talleres ({workshops.length})</TabsTrigger>
+          <TabsTrigger value="reviews">Reseñas ({reviews.length})</TabsTrigger>
+          <TabsTrigger value="comments">Comentarios ({comments.length})</TabsTrigger>
         </TabsList>
 
         <TabsContent value="workshops" className="mt-6">
           {workshops.length === 0 ? (
-            <EmptyState text="You haven't added any workshops yet." cta />
+            <EmptyState text="Aún no has agregado ningún taller." cta />
           ) : (
             <ul className="space-y-3">
               {workshops.map((w) => (
@@ -167,7 +167,7 @@ function MePage() {
 
         <TabsContent value="reviews" className="mt-6">
           {reviews.length === 0 ? (
-            <EmptyState text="You haven't written any reviews yet." />
+            <EmptyState text="Aún no has escrito ninguna reseña." />
           ) : (
             <ul className="space-y-3">
               {reviews.map((r) => (
@@ -182,7 +182,7 @@ function MePage() {
                         {r.workshop.name}
                       </Link>
                     ) : (
-                      <span className="text-muted-foreground">Deleted workshop</span>
+                      <span className="text-muted-foreground">Taller eliminado</span>
                     )}
                     <StarRating value={r.rating} size={14} />
                   </div>
@@ -195,7 +195,7 @@ function MePage() {
 
         <TabsContent value="comments" className="mt-6">
           {comments.length === 0 ? (
-            <EmptyState text="You haven't posted any comments yet." />
+            <EmptyState text="Aún no has publicado ningún comentario." />
           ) : (
             <ul className="space-y-3">
               {comments.map((c) => (
@@ -221,7 +221,7 @@ function EmptyState({ text, cta }: { text: string; cta?: boolean }) {
       {cta && (
         <div className="mt-4">
           <Button asChild>
-            <Link to="/workshops/new">Add a workshop</Link>
+            <Link to="/workshops/new">Agregar un taller</Link>
           </Button>
         </div>
       )}
