@@ -47,15 +47,15 @@ export const Route = createFileRoute("/workshops/$slug")({
   component: WorkshopDetail,
   notFoundComponent: () => (
     <div className="container mx-auto px-4 py-20 text-center">
-      <h1 className="font-display text-3xl font-bold">Workshop not found</h1>
+      <h1 className="font-display text-3xl font-bold">Taller no encontrado</h1>
       <Button asChild className="mt-6">
-        <Link to="/">Browse all workshops</Link>
+        <Link to="/">Ver todos los talleres</Link>
       </Button>
     </div>
   ),
   errorComponent: ({ error }) => (
     <div className="container mx-auto px-4 py-20 text-center">
-      <h1 className="font-display text-2xl font-bold">Something went wrong</h1>
+      <h1 className="font-display text-2xl font-bold">Algo salió mal</h1>
       <p className="mt-2 text-muted-foreground">{error.message}</p>
     </div>
   ),
@@ -116,7 +116,7 @@ type ReplyComment = {
 const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   service_type: z.string().trim().max(40).optional().or(z.literal("")),
-  body: z.string().trim().min(10, "At least 10 characters").max(2000),
+  body: z.string().trim().min(10, "Mínimo 10 caracteres").max(2000),
 });
 
 function WorkshopDetail() {
@@ -232,7 +232,7 @@ function WorkshopDetail() {
   if (loading || !workshop) {
     return (
       <main className="container mx-auto px-4 py-20 text-center text-muted-foreground">
-        Loading…
+        Cargando…
       </main>
     );
   }
@@ -245,7 +245,7 @@ function WorkshopDetail() {
   const deleteWorkshop = async () => {
     const { error } = await supabase.from("workshops").delete().eq("id", workshop.id);
     if (error) return toast.error(error.message);
-    toast.success("Workshop deleted");
+    toast.success("Taller eliminado");
     navigate({ to: "/" });
   };
 
@@ -268,11 +268,11 @@ function WorkshopDetail() {
                   <StarRating value={stats.avg} size={20} />
                   <span className="text-2xl font-bold">{stats.avg.toFixed(1)}</span>
                   <span className="text-muted-foreground">
-                    · {stats.count} review{stats.count === 1 ? "" : "s"}
+                    · {stats.count} reseña{stats.count === 1 ? "" : "s"}
                   </span>
                 </>
               ) : (
-                <span className="text-muted-foreground">No reviews yet — be the first.</span>
+                <span className="text-muted-foreground">Aún no hay reseñas — sé el primero.</span>
               )}
             </div>
 
@@ -301,30 +301,30 @@ function WorkshopDetail() {
                   rel="noopener noreferrer"
                   className="inline-flex items-center gap-1.5 text-foreground/80 hover:text-primary"
                 >
-                  <Globe className="h-4 w-4" /> Website
+                  <Globe className="h-4 w-4" /> Sitio web
                 </a>
               )}
             </div>
 
             <div className="mt-6 flex items-center gap-3 text-xs text-muted-foreground">
-              Added by {owner?.display_name ?? "someone"}
+              Agregado por {owner?.display_name ?? "alguien"}
               {user?.id === workshop.created_by && (
                 <AlertDialog>
                   <AlertDialogTrigger asChild>
                     <Button variant="ghost" size="sm" className="h-7 gap-1 text-destructive hover:text-destructive">
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                      <Trash2 className="h-3.5 w-3.5" /> Eliminar
                     </Button>
                   </AlertDialogTrigger>
                   <AlertDialogContent>
                     <AlertDialogHeader>
-                      <AlertDialogTitle>Delete this workshop?</AlertDialogTitle>
+                      <AlertDialogTitle>¿Eliminar este taller?</AlertDialogTitle>
                       <AlertDialogDescription>
-                        This will also remove all reviews and comments. This cannot be undone.
+                        Esto también eliminará todas las reseñas y comentarios. No se puede deshacer.
                       </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction onClick={deleteWorkshop}>Delete</AlertDialogAction>
+                      <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                      <AlertDialogAction onClick={deleteWorkshop}>Eliminar</AlertDialogAction>
                     </AlertDialogFooter>
                   </AlertDialogContent>
                 </AlertDialog>
@@ -339,7 +339,7 @@ function WorkshopDetail() {
                 type="button"
                 onClick={() => setLightboxStart(0)}
                 className="block w-full focus:outline-none focus:ring-2 focus:ring-primary"
-                aria-label="Open photo gallery"
+                aria-label="Abrir galería de fotos"
               >
                 <img
                   src={gallery[0]}
@@ -389,7 +389,7 @@ function WorkshopDetail() {
       {/* Review form */}
       <section className="container mx-auto max-w-3xl px-4 py-10">
         <h2 className="font-display text-2xl font-semibold">
-          {myReview ? "Your review" : "Leave a review"}
+          {myReview ? "Tu reseña" : "Deja una reseña"}
         </h2>
         {user ? (
           <ReviewForm
@@ -400,16 +400,16 @@ function WorkshopDetail() {
         ) : (
           <div className="mt-4 rounded-xl border border-border bg-card p-5 text-sm">
             <Link to="/login" className="font-medium text-primary hover:underline">
-              Sign in
+              Inicia sesión
             </Link>{" "}
-            to leave a review.
+            para dejar una reseña.
           </div>
         )}
 
         {/* Reviews list */}
-        <h2 className="mt-12 font-display text-2xl font-semibold">All reviews</h2>
+        <h2 className="mt-12 font-display text-2xl font-semibold">Todas las reseñas</h2>
         {reviews.length === 0 ? (
-          <p className="mt-4 text-muted-foreground">No reviews yet.</p>
+          <p className="mt-4 text-muted-foreground">Aún no hay reseñas.</p>
         ) : (
           <ul className="mt-6 space-y-6">
             {reviews.map((r) => (
@@ -472,7 +472,7 @@ function ReviewForm({
       : await supabase.from("reviews").insert(payload);
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success(existing ? "Review updated" : "Review posted");
+    toast.success(existing ? "Reseña actualizada" : "Reseña publicada");
     onSaved();
   };
 
@@ -480,42 +480,42 @@ function ReviewForm({
     if (!existing) return;
     const { error } = await supabase.from("reviews").delete().eq("id", existing.id);
     if (error) return toast.error(error.message);
-    toast.success("Review deleted");
+    toast.success("Reseña eliminada");
     onSaved();
   };
 
   return (
     <form onSubmit={submit} className="mt-4 rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
       <div className="flex items-center gap-3">
-        <span className="text-sm font-medium">Your rating:</span>
+        <span className="text-sm font-medium">Tu calificación:</span>
         <StarRating value={rating} size={24} onChange={setRating} />
       </div>
       <div className="mt-4 space-y-1.5">
-        <label className="text-sm font-medium">Service type (optional)</label>
+        <label className="text-sm font-medium">Tipo de servicio (opcional)</label>
         <Input
           value={serviceType}
           onChange={(e) => setServiceType(e.target.value)}
-          placeholder="e.g. brake replacement"
+          placeholder="ej. cambio de frenos"
           maxLength={40}
         />
       </div>
       <div className="mt-4 space-y-1.5">
-        <label className="text-sm font-medium">Your experience</label>
+        <label className="text-sm font-medium">Tu experiencia</label>
         <Textarea
           rows={4}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="What happened? Was the work good? Fair price?"
+          placeholder="¿Qué pasó? ¿Fue buen trabajo? ¿Precio justo?"
           maxLength={2000}
         />
       </div>
       <div className="mt-4 flex items-center justify-between gap-2">
         <Button type="submit" disabled={busy || rating === 0}>
-          {busy ? "Saving…" : existing ? "Update review" : "Post review"}
+          {busy ? "Guardando…" : existing ? "Actualizar reseña" : "Publicar reseña"}
         </Button>
         {existing && (
           <Button type="button" variant="ghost" onClick={remove} className="text-destructive hover:text-destructive">
-            <Trash2 className="mr-1.5 h-4 w-4" /> Delete
+            <Trash2 className="mr-1.5 h-4 w-4" /> Eliminar
           </Button>
         )}
       </div>
@@ -553,7 +553,7 @@ function ReviewItem({
     if (!user) return;
     const text = commentBody.trim();
     if (text.length < 1 || text.length > 1000) {
-      return toast.error("Comment must be 1–1000 characters");
+      return toast.error("El comentario debe tener 1–1000 caracteres");
     }
     setBusy(true);
     const { error } = await supabase.from("review_comments").insert({
@@ -583,7 +583,7 @@ function ReviewItem({
         </Avatar>
         <div className="flex-1">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="font-medium">{author?.display_name ?? "Someone"}</span>
+            <span className="font-medium">{author?.display_name ?? "Alguien"}</span>
             <StarRating value={review.rating} size={14} />
             {review.service_type && (
               <Badge variant="outline" className="font-normal">
@@ -605,7 +605,7 @@ function ReviewItem({
                 onClick={() => setShowComment((v) => !v)}
               >
                 <MessageSquare className="h-3.5 w-3.5" />
-                Comment
+                Comentar
               </Button>
             )}
             <ReportButton targetType="review" targetId={review.id} />
@@ -616,7 +616,7 @@ function ReviewItem({
               <Input
                 value={commentBody}
                 onChange={(e) => setCommentBody(e.target.value)}
-                placeholder="Add a comment…"
+                placeholder="Agregar un comentario…"
                 maxLength={1000}
               />
               <Button type="submit" size="icon" disabled={busy}>
@@ -632,7 +632,7 @@ function ReviewItem({
                 return (
                   <li key={c.id} className="text-sm">
                     <div className="flex items-center gap-2">
-                      <span className="font-medium">{a?.display_name ?? "Someone"}</span>
+                      <span className="font-medium">{a?.display_name ?? "Alguien"}</span>
                       <span className="text-xs text-muted-foreground">
                         {new Date(c.created_at).toLocaleDateString()}
                       </span>
@@ -640,7 +640,7 @@ function ReviewItem({
                         <button
                           onClick={() => deleteComment(c.id)}
                           className="text-xs text-muted-foreground hover:text-destructive"
-                          aria-label="Delete comment"
+                          aria-label="Eliminar comentario"
                         >
                           <Trash2 className="h-3 w-3" />
                         </button>
@@ -704,7 +704,7 @@ function OwnerReplyBlock({
     if (!user) return;
     const text = body.trim();
     if (text.length < 2 || text.length > 2000) {
-      return toast.error("Reply must be 2–2000 characters");
+      return toast.error("La respuesta debe tener 2–2000 caracteres");
     }
     setBusy(true);
     const { error } = reply
@@ -717,7 +717,7 @@ function OwnerReplyBlock({
         });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success(reply ? "Reply updated" : "Reply posted");
+    toast.success(reply ? "Respuesta actualizada" : "Respuesta publicada");
     setEditing(false);
     onChange();
   };
@@ -726,7 +726,7 @@ function OwnerReplyBlock({
     if (!reply) return;
     const { error } = await supabase.from("review_replies").delete().eq("id", reply.id);
     if (error) return toast.error(error.message);
-    toast.success("Reply removed");
+    toast.success("Respuesta eliminada");
     onChange();
   };
 
@@ -735,7 +735,7 @@ function OwnerReplyBlock({
     if (!user || !reply) return;
     const text = commentBody.trim();
     if (text.length < 1 || text.length > 1000) {
-      return toast.error("Comment must be 1–1000 characters");
+      return toast.error("El comentario debe tener 1–1000 caracteres");
     }
     setBusy(true);
     const { error } = await supabase.from("reply_comments").insert({
@@ -772,9 +772,9 @@ function OwnerReplyBlock({
             </Avatar>
             <div className="flex-1">
               <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium">{author?.display_name ?? "Owner"}</span>
+                <span className="text-sm font-medium">{author?.display_name ?? "Dueño"}</span>
                 <Badge className="h-5 bg-primary px-2 text-[10px] font-medium uppercase tracking-wide">
-                  Owner
+                  Dueño
                 </Badge>
                 <span className="text-xs text-muted-foreground">
                   {new Date(reply.created_at).toLocaleDateString()}
@@ -791,7 +791,7 @@ function OwnerReplyBlock({
                     onClick={() => setShowComment((v) => !v)}
                   >
                     <MessageSquare className="h-3.5 w-3.5" />
-                    Comment
+                    Comentar
                   </Button>
                 )}
                 {isOwner && user?.id === reply.author_id && (
@@ -802,7 +802,7 @@ function OwnerReplyBlock({
                       className="h-7 gap-1 text-xs"
                       onClick={() => setEditing(true)}
                     >
-                      <Pencil className="h-3.5 w-3.5" /> Edit
+                      <Pencil className="h-3.5 w-3.5" /> Editar
                     </Button>
                     <Button
                       variant="ghost"
@@ -810,7 +810,7 @@ function OwnerReplyBlock({
                       className="h-7 gap-1 text-xs text-destructive hover:text-destructive"
                       onClick={deleteReply}
                     >
-                      <Trash2 className="h-3.5 w-3.5" /> Delete
+                      <Trash2 className="h-3.5 w-3.5" /> Eliminar
                     </Button>
                   </>
                 )}
@@ -821,7 +821,7 @@ function OwnerReplyBlock({
                   <Input
                     value={commentBody}
                     onChange={(e) => setCommentBody(e.target.value)}
-                    placeholder="Comment on the owner's reply…"
+                    placeholder="Comenta sobre la respuesta del dueño…"
                     maxLength={1000}
                   />
                   <Button type="submit" size="icon" disabled={busy}>
@@ -837,7 +837,7 @@ function OwnerReplyBlock({
                     return (
                       <li key={c.id} className="text-sm">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium">{a?.display_name ?? "Someone"}</span>
+                          <span className="font-medium">{a?.display_name ?? "Alguien"}</span>
                           <span className="text-xs text-muted-foreground">
                             {new Date(c.created_at).toLocaleDateString()}
                           </span>
@@ -845,7 +845,7 @@ function OwnerReplyBlock({
                             <button
                               onClick={() => deleteReplyComment(c.id)}
                               className="text-xs text-muted-foreground hover:text-destructive"
-                              aria-label="Delete comment"
+                              aria-label="Eliminar comentario"
                             >
                               <Trash2 className="h-3 w-3" />
                             </button>
@@ -866,22 +866,22 @@ function OwnerReplyBlock({
         <form onSubmit={saveReply} className="space-y-2">
           <div className="flex items-center gap-2">
             <Badge className="h-5 bg-primary px-2 text-[10px] font-medium uppercase tracking-wide">
-              Owner reply
+              Respuesta del dueño
             </Badge>
             <span className="text-xs text-muted-foreground">
-              Public response visible to all visitors
+              Respuesta pública visible para todos los visitantes
             </span>
           </div>
           <Textarea
             rows={3}
             value={body}
             onChange={(e) => setBody(e.target.value)}
-            placeholder="Thank the customer, clarify, or address concerns…"
+            placeholder="Agradece al cliente, aclara o responde a las inquietudes…"
             maxLength={2000}
           />
           <div className="flex items-center gap-2">
             <Button type="submit" size="sm" disabled={busy}>
-              {busy ? "Saving…" : reply ? "Save reply" : "Post reply"}
+              {busy ? "Guardando…" : reply ? "Guardar respuesta" : "Publicar respuesta"}
             </Button>
             {reply && (
               <Button
@@ -893,7 +893,7 @@ function OwnerReplyBlock({
                   setBody(reply.body);
                 }}
               >
-                Cancel
+                Cancelar
               </Button>
             )}
           </div>
@@ -919,7 +919,7 @@ function ReportButton({
 
   const submit = async () => {
     const r = reason.trim();
-    if (r.length < 5 || r.length > 500) return toast.error("Reason must be 5–500 chars");
+    if (r.length < 5 || r.length > 500) return toast.error("La razón debe tener 5–500 caracteres");
     setBusy(true);
     const { error } = await supabase.from("reports").insert({
       reporter_id: user.id,
@@ -929,7 +929,7 @@ function ReportButton({
     });
     setBusy(false);
     if (error) return toast.error(error.message);
-    toast.success("Reported. Thanks for flagging.");
+    toast.success("Reportado. Gracias por avisarnos.");
     setOpen(false);
     setReason("");
   };
@@ -938,27 +938,27 @@ function ReportButton({
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
         <Button variant="ghost" size="sm" className="h-7 gap-1 text-xs text-muted-foreground hover:text-destructive">
-          <Flag className="h-3.5 w-3.5" /> Report
+          <Flag className="h-3.5 w-3.5" /> Reportar
         </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Report this content</DialogTitle>
-          <DialogDescription>Tell us what's wrong. Our team will review.</DialogDescription>
+          <DialogTitle>Reportar este contenido</DialogTitle>
+          <DialogDescription>Cuéntanos qué pasa. Nuestro equipo lo revisará.</DialogDescription>
         </DialogHeader>
         <Textarea
           rows={4}
           value={reason}
           onChange={(e) => setReason(e.target.value)}
-          placeholder="Why are you reporting this?"
+          placeholder="¿Por qué estás reportando esto?"
           maxLength={500}
         />
         <DialogFooter>
           <Button variant="ghost" onClick={() => setOpen(false)}>
-            Cancel
+            Cancelar
           </Button>
           <Button onClick={submit} disabled={busy}>
-            Submit report
+            Enviar reporte
           </Button>
         </DialogFooter>
       </DialogContent>
