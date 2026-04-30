@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { slugify } from "@/lib/slug";
@@ -15,24 +14,24 @@ import { slugify } from "@/lib/slug";
 export const Route = createFileRoute("/workshops/new")({
   head: () => ({
     meta: [
-      { title: "Add a workshop — WrenchRate" },
-      { name: "description", content: "Add a mechanic workshop to the WrenchRate directory." },
+      { title: "Agregar un taller — MecaRate" },
+      { name: "description", content: "Agrega un taller mecánico al directorio de MecaRate." },
     ],
   }),
   component: NewWorkshop,
 });
 
 const SUGGESTED = [
-  "General repair",
-  "Brakes",
-  "Electrical",
-  "Bodywork",
-  "Tires",
-  "Diagnostics",
-  "Engine",
-  "Transmission",
-  "AC",
-  "Hybrid/EV",
+  "Mecánica general",
+  "Frenos",
+  "Eléctrico",
+  "Hojalatería",
+  "Llantas",
+  "Diagnóstico",
+  "Motor",
+  "Transmisión",
+  "Aire acondicionado",
+  "Híbrido/Eléctrico",
 ];
 
 const schema = z.object({
@@ -40,8 +39,8 @@ const schema = z.object({
   city: z.string().trim().min(2).max(80),
   address: z.string().trim().max(200).optional().or(z.literal("")),
   phone: z.string().trim().max(40).optional().or(z.literal("")),
-  website: z.string().trim().url("Invalid URL").max(200).optional().or(z.literal("")),
-  description: z.string().trim().min(20, "At least 20 characters").max(2000),
+  website: z.string().trim().url("URL inválida").max(200).optional().or(z.literal("")),
+  description: z.string().trim().min(20, "Mínimo 20 caracteres").max(2000),
 });
 
 function NewWorkshop() {
@@ -64,7 +63,6 @@ function NewWorkshop() {
     if (!loading && !user) navigate({ to: "/login" });
   }, [user, loading, navigate]);
 
-  // Duplicate name check (debounced)
   useEffect(() => {
     if (name.trim().length < 3) {
       setDuplicate(null);
@@ -116,7 +114,6 @@ function NewWorkshop() {
     try {
       let baseSlug = slugify(parsed.data.name);
       let slug = baseSlug;
-      // Resolve slug collisions
       for (let i = 2; i < 10; i++) {
         const { data: exists } = await supabase
           .from("workshops")
@@ -157,10 +154,10 @@ function NewWorkshop() {
       });
       if (error) throw error;
 
-      toast.success("Workshop added!");
+      toast.success("¡Taller agregado!");
       navigate({ to: "/workshops/$slug", params: { slug } });
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "Something went wrong";
+      const msg = err instanceof Error ? err.message : "Algo salió mal";
       toast.error(msg);
     } finally {
       setBusy(false);
@@ -169,24 +166,24 @@ function NewWorkshop() {
 
   return (
     <main className="container mx-auto max-w-2xl px-4 py-10">
-      <h1 className="font-display text-4xl font-bold">Add a workshop</h1>
+      <h1 className="font-display text-4xl font-bold">Agregar un taller</h1>
       <p className="mt-2 text-muted-foreground">
-        Share a mechanic shop so others can find — or avoid — it.
+        Comparte un taller mecánico para que otros puedan encontrarlo — o evitarlo.
       </p>
 
       <form onSubmit={handleSubmit} className="mt-8 space-y-6">
         <div className="space-y-1.5">
-          <Label htmlFor="name">Workshop name *</Label>
+          <Label htmlFor="name">Nombre del taller *</Label>
           <Input id="name" required value={name} onChange={(e) => setName(e.target.value)} maxLength={100} />
           {duplicate && (
             <p className="text-sm text-destructive">
-              Looks like “{duplicate.name}” is already listed.{" "}
+              Parece que “{duplicate.name}” ya está listado.{" "}
               <Link
                 to="/workshops/$slug"
                 params={{ slug: duplicate.slug }}
                 className="font-medium underline"
               >
-                View it
+                Verlo
               </Link>
               .
             </p>
@@ -195,22 +192,22 @@ function NewWorkshop() {
 
         <div className="grid gap-4 sm:grid-cols-2">
           <div className="space-y-1.5">
-            <Label htmlFor="city">City *</Label>
+            <Label htmlFor="city">Ciudad *</Label>
             <Input id="city" required value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} />
           </div>
           <div className="space-y-1.5">
-            <Label htmlFor="phone">Phone</Label>
+            <Label htmlFor="phone">Teléfono</Label>
             <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} />
           </div>
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="address">Address</Label>
+          <Label htmlFor="address">Dirección</Label>
           <Input id="address" value={address} onChange={(e) => setAddress(e.target.value)} maxLength={200} />
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="website">Website</Label>
+          <Label htmlFor="website">Sitio web</Label>
           <Input
             id="website"
             type="url"
@@ -222,7 +219,7 @@ function NewWorkshop() {
         </div>
 
         <div className="space-y-2">
-          <Label>Specialties</Label>
+          <Label>Especialidades</Label>
           <div className="flex flex-wrap gap-2">
             {SUGGESTED.map((s) => {
               const active = specialties.includes(s);
@@ -245,12 +242,12 @@ function NewWorkshop() {
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="description">Description *</Label>
+          <Label htmlFor="description">Descripción *</Label>
           <Textarea
             id="description"
             required
             rows={5}
-            placeholder="What kind of work do they do? Anything to know?"
+            placeholder="¿Qué tipo de trabajo hacen? ¿Algo que se deba saber?"
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             maxLength={2000}
@@ -259,24 +256,24 @@ function NewWorkshop() {
         </div>
 
         <div className="space-y-2">
-          <Label>Photos <span className="text-xs text-muted-foreground">(up to 8)</span></Label>
+          <Label>Fotos <span className="text-xs text-muted-foreground">(hasta 8)</span></Label>
           <div className="flex flex-wrap gap-3">
             {photoPreviews.map((src, idx) => (
               <div
                 key={src}
                 className="relative overflow-hidden rounded-xl border border-border"
               >
-                <img src={src} alt={`preview ${idx + 1}`} className="h-32 w-32 object-cover" />
+                <img src={src} alt={`vista previa ${idx + 1}`} className="h-32 w-32 object-cover" />
                 {idx === 0 && (
                   <span className="absolute left-1.5 top-1.5 rounded-full bg-primary px-2 py-0.5 text-[10px] font-medium text-primary-foreground">
-                    Cover
+                    Portada
                   </span>
                 )}
                 <button
                   type="button"
                   onClick={() => removePhoto(idx)}
                   className="absolute right-1.5 top-1.5 rounded-full bg-background/90 p-1 shadow"
-                  aria-label="Remove photo"
+                  aria-label="Quitar foto"
                 >
                   <X className="h-3.5 w-3.5" />
                 </button>
@@ -285,7 +282,7 @@ function NewWorkshop() {
             {photoPreviews.length < 8 && (
               <label className="flex h-32 w-32 cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed border-border bg-card/40 text-xs text-muted-foreground transition-colors hover:border-primary hover:text-primary">
                 <ImagePlus className="h-5 w-5" />
-                Add photo
+                Agregar foto
                 <input
                   type="file"
                   accept="image/*"
@@ -296,15 +293,15 @@ function NewWorkshop() {
               </label>
             )}
           </div>
-          <p className="text-xs text-muted-foreground">First photo is used as the cover.</p>
+          <p className="text-xs text-muted-foreground">La primera foto se usa como portada.</p>
         </div>
 
         <div className="flex items-center gap-3 pt-2">
           <Button type="submit" disabled={busy} size="lg">
-            {busy ? "Publishing…" : "Publish workshop"}
+            {busy ? "Publicando…" : "Publicar taller"}
           </Button>
           <Button asChild type="button" variant="ghost">
-            <Link to="/">Cancel</Link>
+            <Link to="/">Cancelar</Link>
           </Button>
         </div>
       </form>

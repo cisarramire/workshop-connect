@@ -129,8 +129,6 @@ function Home() {
     return arr;
   }, [workshops, query, city, specialty, sort]);
 
-  // When the minimap detects the user's city, auto-apply it as a filter
-  // if it matches one of our known workshop cities.
   const handleCityDetected = (detected: string) => {
     const match = cities.find((c) => c.toLowerCase() === detected.toLowerCase());
     if (match && city === "all") setCity(match);
@@ -144,16 +142,16 @@ function Home() {
           <div className="max-w-3xl">
             <div className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs text-muted-foreground shadow-sm">
               <ShieldAlert className="h-3.5 w-3.5 text-primary" />
-              Real reviews from real drivers
+              Reseñas reales de conductores reales
             </div>
             <h1 className="mt-5 font-display text-4xl font-bold leading-[1.05] sm:text-6xl">
-              Find a mechanic
+              Encuentra un mecánico
               <br />
-              <span className="text-primary">you can actually trust.</span>
+              <span className="text-primary">en quien sí puedas confiar.</span>
             </h1>
             <p className="mt-5 max-w-xl text-lg text-muted-foreground">
-              Browse workshops added by the community, see honest ratings, and warn others
-              about the bad apples. Add a shop in seconds.
+              Explora talleres agregados por la comunidad, mira calificaciones honestas y advierte
+              a otros sobre los malos. Agrega un taller en segundos.
             </p>
 
             <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -162,17 +160,16 @@ function Home() {
                 <Input
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search by name, city, or specialty…"
+                  placeholder="Busca por nombre, ciudad o especialidad…"
                   className="h-12 pl-10"
                 />
               </div>
               <Button asChild size="lg" className="h-12">
-                <Link to="/workshops/new">Add a workshop</Link>
+                <Link to="/workshops/new">Agregar un taller</Link>
               </Button>
             </div>
           </div>
 
-          {/* City minimap (only renders if user grants location) */}
           <div className="lg:max-w-md lg:justify-self-end">
             <CityMiniMap onCityDetected={handleCityDetected} />
           </div>
@@ -183,15 +180,17 @@ function Home() {
       <section className="container mx-auto px-4 py-10">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-3">
           <h2 className="font-display text-2xl font-semibold">
-            {loading ? "Loading…" : `${filtered.length} workshop${filtered.length === 1 ? "" : "s"}`}
+            {loading
+              ? "Cargando…"
+              : `${filtered.length} taller${filtered.length === 1 ? "" : "es"}`}
           </h2>
           <div className="flex flex-wrap items-center gap-2">
             <Select value={city} onValueChange={setCity}>
-              <SelectTrigger className="w-[140px]">
-                <SelectValue placeholder="City" />
+              <SelectTrigger className="w-[160px]">
+                <SelectValue placeholder="Ciudad" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All cities</SelectItem>
+                <SelectItem value="all">Todas las ciudades</SelectItem>
                 {cities.map((c) => (
                   <SelectItem key={c} value={c}>
                     {c}
@@ -200,11 +199,11 @@ function Home() {
               </SelectContent>
             </Select>
             <Select value={specialty} onValueChange={setSpecialty}>
-              <SelectTrigger className="w-[160px]">
-                <SelectValue placeholder="Specialty" />
+              <SelectTrigger className="w-[180px]">
+                <SelectValue placeholder="Especialidad" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All specialties</SelectItem>
+                <SelectItem value="all">Todas las especialidades</SelectItem>
                 {allSpecialties.map((s) => (
                   <SelectItem key={s} value={s}>
                     {s}
@@ -213,14 +212,14 @@ function Home() {
               </SelectContent>
             </Select>
             <Select value={sort} onValueChange={(v) => setSort(v as SortKey)}>
-              <SelectTrigger className="w-[160px]">
+              <SelectTrigger className="w-[180px]">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="top">Top rated</SelectItem>
-                <SelectItem value="worst">Worst rated</SelectItem>
-                <SelectItem value="popular">Most reviewed</SelectItem>
-                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="top">Mejor calificados</SelectItem>
+                <SelectItem value="worst">Peor calificados</SelectItem>
+                <SelectItem value="popular">Más reseñas</SelectItem>
+                <SelectItem value="newest">Más recientes</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -229,12 +228,12 @@ function Home() {
         {!loading && filtered.length === 0 ? (
           <div className="rounded-2xl border border-dashed border-border bg-card/50 px-6 py-16 text-center">
             <Wrench className="mx-auto h-10 w-10 text-muted-foreground/60" />
-            <h3 className="mt-4 font-display text-xl font-semibold">No workshops yet</h3>
+            <h3 className="mt-4 font-display text-xl font-semibold">Aún no hay talleres</h3>
             <p className="mt-2 text-sm text-muted-foreground">
-              Be the first to put a mechanic on the map.
+              Sé el primero en poner un mecánico en el mapa.
             </p>
             <Button asChild className="mt-5">
-              <Link to="/workshops/new">Add a workshop</Link>
+              <Link to="/workshops/new">Agregar un taller</Link>
             </Button>
           </div>
         ) : (
@@ -283,7 +282,7 @@ function Home() {
                     </div>
                     <div className="mt-4 flex items-center gap-1.5 border-t border-border pt-3 text-xs text-muted-foreground">
                       <MessageSquare className="h-3.5 w-3.5" />
-                      {w.review_count} review{w.review_count === 1 ? "" : "s"}
+                      {w.review_count} reseña{w.review_count === 1 ? "" : "s"}
                     </div>
                   </div>
                 </Link>
