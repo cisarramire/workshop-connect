@@ -244,6 +244,7 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
               attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'
             />
             <MapClickHandler />
+            <MapRecenter coords={coords} />
             {coords && (
               <bits.Marker
                 position={[coords.lat, coords.lon]}
