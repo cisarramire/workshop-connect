@@ -6,7 +6,7 @@ import { ImagePlus, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { slugify } from "@/lib/slug";
@@ -39,9 +39,6 @@ const schema = z.object({
   name: z.string().trim().min(2).max(100),
   city: z.string().trim().min(2).max(80),
   address: z.string().trim().max(200).optional().or(z.literal("")),
-  phone: z.string().trim().max(40).optional().or(z.literal("")),
-  website: z.string().trim().url("URL inválida").max(200).optional().or(z.literal("")),
-  description: z.string().trim().min(20, "Mínimo 20 caracteres").max(2000),
 });
 
 function NewWorkshop() {
@@ -51,9 +48,6 @@ function NewWorkshop() {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
-  const [phone, setPhone] = useState("");
-  const [website, setWebsite] = useState("");
-  const [description, setDescription] = useState("");
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
@@ -105,7 +99,7 @@ function NewWorkshop() {
     e.preventDefault();
     if (!user) return;
 
-    const parsed = schema.safeParse({ name, city, address, phone, website, description });
+    const parsed = schema.safeParse({ name, city, address });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
@@ -146,9 +140,7 @@ function NewWorkshop() {
         slug,
         city: parsed.data.city,
         address: parsed.data.address || null,
-        phone: parsed.data.phone || null,
-        website: parsed.data.website || null,
-        description: parsed.data.description,
+        description: "",
         photo_url,
         photos: uploaded,
         specialties,
@@ -191,15 +183,9 @@ function NewWorkshop() {
           )}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="city">Ciudad *</Label>
-            <Input id="city" required value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="phone">Teléfono</Label>
-            <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} />
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="city">Ciudad *</Label>
+          <Input id="city" required value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} />
         </div>
 
         <div className="space-y-2">
@@ -211,18 +197,6 @@ function NewWorkshop() {
               setAddress(a);
               if (c) setCity(c);
             }}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="website">Sitio web</Label>
-          <Input
-            id="website"
-            type="url"
-            placeholder="https://"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-            maxLength={200}
           />
         </div>
 
@@ -247,20 +221,6 @@ function NewWorkshop() {
               );
             })}
           </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="description">Descripción *</Label>
-          <Textarea
-            id="description"
-            required
-            rows={5}
-            placeholder="¿Qué tipo de trabajo hacen? ¿Algo que se deba saber?"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={2000}
-          />
-          <p className="text-xs text-muted-foreground">{description.length}/2000</p>
         </div>
 
         <div className="space-y-2">

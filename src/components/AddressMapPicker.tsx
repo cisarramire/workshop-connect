@@ -33,6 +33,28 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
     setMounted(true);
   }, []);
 
+  // Auto-center map on city when it changes (debounced)
+  useEffect(() => {
+    if (!city || city.trim().length < 3) return;
+    const handle = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(city)}&format=json&limit=1&accept-language=es`,
+        );
+        const data = await res.json();
+        if (Array.isArray(data) && data.length > 0) {
+          const lat = parseFloat(data[0].lat);
+          const lon = parseFloat(data[0].lon);
+          setCoords({ lat, lon });
+        }
+      } catch {
+        /* silent */
+      }
+    }, 600);
+    return () => clearTimeout(handle);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [city]);
+
   useEffect(() => {
     if (!mounted) return;
     let cancelled = false;
