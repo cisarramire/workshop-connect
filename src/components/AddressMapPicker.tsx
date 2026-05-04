@@ -31,6 +31,18 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
 
   useEffect(() => {
     setMounted(true);
+    // Try to center map on the user's current location on first mount
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setCoords((prev) => prev ?? { lat: pos.coords.latitude, lon: pos.coords.longitude });
+        },
+        () => {
+          /* denied — fall back to default center */
+        },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
+      );
+    }
   }, []);
 
   // Auto-center map on city when it changes (debounced)
