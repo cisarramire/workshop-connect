@@ -178,6 +178,16 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
     return null;
   }
 
+  function MapRecenter({ coords: c }: { coords: Coords | null }) {
+    if (!bits) return null;
+    const map = bits.useMap();
+    useEffect(() => {
+      if (c) map.setView([c.lat, c.lon], Math.max(map.getZoom(), 14));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [c?.lat, c?.lon]);
+    return null;
+  }
+
   const center: [number, number] = coords
     ? [coords.lat, coords.lon]
     : [19.4326, -99.1332]; // Mexico City fallback
