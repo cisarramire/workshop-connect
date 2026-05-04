@@ -92,6 +92,7 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
         TileLayer: rl.TileLayer,
         Marker: rl.Marker,
         useMapEvents: rl.useMapEvents,
+        useMap: rl.useMap,
         Icon: L.Icon,
       });
     })();
