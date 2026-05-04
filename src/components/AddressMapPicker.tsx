@@ -17,6 +17,7 @@ type LeafletBits = {
   TileLayer: typeof import("react-leaflet").TileLayer;
   Marker: typeof import("react-leaflet").Marker;
   useMapEvents: typeof import("react-leaflet").useMapEvents;
+  useMap: typeof import("react-leaflet").useMap;
   Icon: typeof import("leaflet").Icon;
 };
 
@@ -31,6 +32,18 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
 
   useEffect(() => {
     setMounted(true);
+    // Try to center map on the user's current location on first mount
+    if (typeof navigator !== "undefined" && navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (pos) => {
+          setCoords((prev) => prev ?? { lat: pos.coords.latitude, lon: pos.coords.longitude });
+        },
+        () => {
+          /* denied — fall back to default center */
+        },
+        { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
+      );
+    }
   }, []);
 
   // Auto-center map on city when it changes (debounced)
@@ -79,6 +92,7 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
         TileLayer: rl.TileLayer,
         Marker: rl.Marker,
         useMapEvents: rl.useMapEvents,
+        useMap: rl.useMap,
         Icon: L.Icon,
       });
     })();
@@ -164,6 +178,16 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
     return null;
   }
 
+  function MapRecenter({ coords: c }: { coords: Coords | null }) {
+    if (!bits) return null;
+    const map = bits.useMap();
+    useEffect(() => {
+      if (c) map.setView([c.lat, c.lon], Math.max(map.getZoom(), 14));
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [c?.lat, c?.lon]);
+    return null;
+  }
+
   const center: [number, number] = coords
     ? [coords.lat, coords.lon]
     : [19.4326, -99.1332]; // Mexico City fallback
@@ -230,6 +254,7 @@ export function AddressMapPicker({ address, city, onChange }: Props) {
               attribution='&copy; <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>'
             />
             <MapClickHandler />
+            <MapRecenter coords={coords} />
             {coords && (
               <bits.Marker
                 position={[coords.lat, coords.lon]}
