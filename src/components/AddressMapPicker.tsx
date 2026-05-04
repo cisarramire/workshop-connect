@@ -17,6 +17,7 @@ type LeafletBits = {
   TileLayer: typeof import("react-leaflet").TileLayer;
   Marker: typeof import("react-leaflet").Marker;
   useMapEvents: typeof import("react-leaflet").useMapEvents;
+  useMap: typeof import("react-leaflet").useMap;
   Icon: typeof import("leaflet").Icon;
 };
 
