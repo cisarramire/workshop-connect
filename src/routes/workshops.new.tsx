@@ -39,9 +39,6 @@ const schema = z.object({
   name: z.string().trim().min(2).max(100),
   city: z.string().trim().min(2).max(80),
   address: z.string().trim().max(200).optional().or(z.literal("")),
-  phone: z.string().trim().max(40).optional().or(z.literal("")),
-  website: z.string().trim().url("URL inválida").max(200).optional().or(z.literal("")),
-  description: z.string().trim().min(20, "Mínimo 20 caracteres").max(2000),
 });
 
 function NewWorkshop() {
