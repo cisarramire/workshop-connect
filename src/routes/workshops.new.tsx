@@ -99,7 +99,7 @@ function NewWorkshop() {
     e.preventDefault();
     if (!user) return;
 
-    const parsed = schema.safeParse({ name, city, address, phone, website, description });
+    const parsed = schema.safeParse({ name, city, address });
     if (!parsed.success) {
       toast.error(parsed.error.issues[0].message);
       return;
