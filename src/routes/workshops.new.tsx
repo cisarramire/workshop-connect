@@ -183,15 +183,9 @@ function NewWorkshop() {
           )}
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div className="space-y-1.5">
-            <Label htmlFor="city">Ciudad *</Label>
-            <Input id="city" required value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="phone">Teléfono</Label>
-            <Input id="phone" value={phone} onChange={(e) => setPhone(e.target.value)} maxLength={40} />
-          </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="city">Ciudad *</Label>
+          <Input id="city" required value={city} onChange={(e) => setCity(e.target.value)} maxLength={80} />
         </div>
 
         <div className="space-y-2">
@@ -203,18 +197,6 @@ function NewWorkshop() {
               setAddress(a);
               if (c) setCity(c);
             }}
-          />
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="website">Sitio web</Label>
-          <Input
-            id="website"
-            type="url"
-            placeholder="https://"
-            value={website}
-            onChange={(e) => setWebsite(e.target.value)}
-            maxLength={200}
           />
         </div>
 
@@ -239,20 +221,6 @@ function NewWorkshop() {
               );
             })}
           </div>
-        </div>
-
-        <div className="space-y-1.5">
-          <Label htmlFor="description">Descripción *</Label>
-          <Textarea
-            id="description"
-            required
-            rows={5}
-            placeholder="¿Qué tipo de trabajo hacen? ¿Algo que se deba saber?"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            maxLength={2000}
-          />
-          <p className="text-xs text-muted-foreground">{description.length}/2000</p>
         </div>
 
         <div className="space-y-2">
