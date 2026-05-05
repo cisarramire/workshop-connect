@@ -767,6 +767,7 @@ function OwnerReplyBlock({
   isOwner,
   reply,
   replyComments,
+  replyReactions,
   profiles,
   onChange,
 }: {
@@ -775,6 +776,7 @@ function OwnerReplyBlock({
   isOwner: boolean;
   reply: Reply | null;
   replyComments: ReplyComment[];
+  replyReactions: ReplyReaction[];
   profiles: Map<string, Profile>;
   onChange: () => void;
 }) {
