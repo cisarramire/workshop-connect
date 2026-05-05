@@ -12,6 +12,8 @@ import {
   Pencil,
   Flag,
   Send,
+  ThumbsUp,
+  ThumbsDown,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -113,6 +115,13 @@ type ReplyComment = {
   created_at: string;
 };
 
+type Reaction = {
+  id: string;
+  review_id: string;
+  user_id: string;
+  value: number;
+};
+
 const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   service_type: z.string().trim().max(40).optional().or(z.literal("")),
@@ -129,6 +138,7 @@ function WorkshopDetail() {
   const [comments, setComments] = useState<Comment[]>([]);
   const [replies, setReplies] = useState<Reply[]>([]);
   const [replyComments, setReplyComments] = useState<ReplyComment[]>([]);
+  const [reactions, setReactions] = useState<Reaction[]>([]);
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
   const [loading, setLoading] = useState(true);
   const [lightboxStart, setLightboxStart] = useState<number | null>(null);
@@ -158,7 +168,7 @@ function WorkshopDetail() {
     let replyList: Reply[] = [];
     let replyCommentList: ReplyComment[] = [];
     if (reviewIds.length) {
-      const [{ data: cs }, { data: rps }] = await Promise.all([
+      const [{ data: cs }, { data: rps }, { data: rxs }] = await Promise.all([
         supabase
           .from("review_comments")
           .select("*")
@@ -169,9 +179,14 @@ function WorkshopDetail() {
           .select("*")
           .in("review_id", reviewIds)
           .order("created_at", { ascending: true }),
+        supabase
+          .from("review_reactions")
+          .select("*")
+          .in("review_id", reviewIds),
       ]);
       commentList = (cs ?? []) as Comment[];
       replyList = (rps ?? []) as Reply[];
+      setReactions((rxs ?? []) as Reaction[]);
 
       const replyIds = replyList.map((r) => r.id);
       if (replyIds.length) {
@@ -421,6 +436,7 @@ function WorkshopDetail() {
                 comments={comments.filter((c) => c.review_id === r.id)}
                 reply={replies.find((rep) => rep.review_id === r.id) ?? null}
                 replyComments={replyComments}
+                reactions={reactions.filter((rx) => rx.review_id === r.id)}
                 profiles={profiles}
                 onChange={loadAll}
               />
@@ -530,6 +546,7 @@ function ReviewItem({
   comments,
   reply,
   replyComments,
+  reactions,
   profiles,
   onChange,
 }: {
@@ -539,6 +556,7 @@ function ReviewItem({
   comments: Comment[];
   reply: Reply | null;
   replyComments: ReplyComment[];
+  reactions: Reaction[];
   profiles: Map<string, Profile>;
   onChange: () => void;
 }) {
@@ -574,6 +592,34 @@ function ReviewItem({
     onChange();
   };
 
+  const likes = reactions.filter((r) => r.value === 1).length;
+  const dislikes = reactions.filter((r) => r.value === -1).length;
+  const myReaction = user ? reactions.find((r) => r.user_id === user.id) ?? null : null;
+
+  const react = async (value: 1 | -1) => {
+    if (!user) return toast.error("Inicia sesión para reaccionar");
+    if (myReaction?.value === value) {
+      const { error } = await supabase.from("review_reactions").delete().eq("id", myReaction.id);
+      if (error) return toast.error(error.message);
+    } else if (myReaction) {
+      const { error } = await supabase
+        .from("review_reactions")
+        .update({ value })
+        .eq("id", myReaction.id);
+      if (error) return toast.error(error.message);
+    } else {
+      const { error } = await supabase.from("review_reactions").insert({
+        review_id: review.id,
+        user_id: user.id,
+        value,
+      });
+      if (error) return toast.error(error.message);
+    }
+    onChange();
+  };
+
+  const isOwnReview = user?.id === review.author_id;
+
   return (
     <li className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
       <div className="flex items-start gap-3">
@@ -596,7 +642,29 @@ function ReviewItem({
           </div>
           <p className="mt-2 whitespace-pre-line text-foreground/90">{review.body}</p>
 
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isOwnReview}
+              onClick={() => react(1)}
+              className={`h-7 gap-1 text-xs ${myReaction?.value === 1 ? "text-primary" : ""}`}
+              aria-label="Me gusta"
+            >
+              <ThumbsUp className={`h-3.5 w-3.5 ${myReaction?.value === 1 ? "fill-current" : ""}`} />
+              {likes}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isOwnReview}
+              onClick={() => react(-1)}
+              className={`h-7 gap-1 text-xs ${myReaction?.value === -1 ? "text-destructive" : ""}`}
+              aria-label="No me gusta"
+            >
+              <ThumbsDown className={`h-3.5 w-3.5 ${myReaction?.value === -1 ? "fill-current" : ""}`} />
+              {dislikes}
+            </Button>
             {user && (
               <Button
                 variant="ghost"
