@@ -146,6 +146,7 @@ function WorkshopDetail() {
   const [replies, setReplies] = useState<Reply[]>([]);
   const [replyComments, setReplyComments] = useState<ReplyComment[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [replyReactions, setReplyReactions] = useState<ReplyReaction[]>([]);
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
   const [loading, setLoading] = useState(true);
   const [lightboxStart, setLightboxStart] = useState<number | null>(null);
