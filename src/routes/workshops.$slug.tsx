@@ -751,6 +751,7 @@ function ReviewItem({
             isOwner={isOwner}
             reply={reply}
             replyComments={replyComments.filter((rc) => reply && rc.reply_id === reply.id)}
+            replyReactions={reply ? replyReactions.filter((rx) => rx.reply_id === reply.id) : []}
             profiles={profiles}
             onChange={onChange}
           />
