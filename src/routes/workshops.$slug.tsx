@@ -793,6 +793,32 @@ function OwnerReplyBlock({
 
   const author = reply ? profiles.get(reply.author_id) : null;
 
+  const replyLikes = replyReactions.filter((r) => r.value === 1).length;
+  const replyDislikes = replyReactions.filter((r) => r.value === -1).length;
+  const myReplyReaction = user ? replyReactions.find((r) => r.user_id === user.id) ?? null : null;
+
+  const reactReply = async (value: 1 | -1) => {
+    if (!user || !reply) return toast.error("Inicia sesión para reaccionar");
+    if (myReplyReaction?.value === value) {
+      const { error } = await supabase.from("reply_reactions").delete().eq("id", myReplyReaction.id);
+      if (error) return toast.error(error.message);
+    } else if (myReplyReaction) {
+      const { error } = await supabase
+        .from("reply_reactions")
+        .update({ value })
+        .eq("id", myReplyReaction.id);
+      if (error) return toast.error(error.message);
+    } else {
+      const { error } = await supabase.from("reply_reactions").insert({
+        reply_id: reply.id,
+        user_id: user.id,
+        value,
+      });
+      if (error) return toast.error(error.message);
+    }
+    onChange();
+  };
+
   const saveReply = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
