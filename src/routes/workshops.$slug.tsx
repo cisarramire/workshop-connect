@@ -198,13 +198,25 @@ function WorkshopDetail() {
 
       const replyIds = replyList.map((r) => r.id);
       if (replyIds.length) {
-        const { data: rcs } = await supabase
-          .from("reply_comments")
-          .select("*")
-          .in("reply_id", replyIds)
-          .order("created_at", { ascending: true });
+        const [{ data: rcs }, { data: rrxs }] = await Promise.all([
+          supabase
+            .from("reply_comments")
+            .select("*")
+            .in("reply_id", replyIds)
+            .order("created_at", { ascending: true }),
+          supabase
+            .from("reply_reactions")
+            .select("*")
+            .in("reply_id", replyIds),
+        ]);
         replyCommentList = (rcs ?? []) as ReplyComment[];
+        setReplyReactions((rrxs ?? []) as ReplyReaction[]);
+      } else {
+        setReplyReactions([]);
       }
+    } else {
+      setReactions([]);
+      setReplyReactions([]);
     }
     setComments(commentList);
     setReplies(replyList);
