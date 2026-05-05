@@ -122,6 +122,13 @@ type Reaction = {
   value: number;
 };
 
+type ReplyReaction = {
+  id: string;
+  reply_id: string;
+  user_id: string;
+  value: number;
+};
+
 const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   service_type: z.string().trim().max(40).optional().or(z.literal("")),
