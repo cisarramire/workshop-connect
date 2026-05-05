@@ -168,7 +168,7 @@ function WorkshopDetail() {
     let replyList: Reply[] = [];
     let replyCommentList: ReplyComment[] = [];
     if (reviewIds.length) {
-      const [{ data: cs }, { data: rps }] = await Promise.all([
+      const [{ data: cs }, { data: rps }, { data: rxs }] = await Promise.all([
         supabase
           .from("review_comments")
           .select("*")
@@ -179,9 +179,14 @@ function WorkshopDetail() {
           .select("*")
           .in("review_id", reviewIds)
           .order("created_at", { ascending: true }),
+        supabase
+          .from("review_reactions")
+          .select("*")
+          .in("review_id", reviewIds),
       ]);
       commentList = (cs ?? []) as Comment[];
       replyList = (rps ?? []) as Reply[];
+      setReactions((rxs ?? []) as Reaction[]);
 
       const replyIds = replyList.map((r) => r.id);
       if (replyIds.length) {
