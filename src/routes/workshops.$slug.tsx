@@ -546,6 +546,7 @@ function ReviewItem({
   comments,
   reply,
   replyComments,
+  reactions,
   profiles,
   onChange,
 }: {
@@ -555,6 +556,7 @@ function ReviewItem({
   comments: Comment[];
   reply: Reply | null;
   replyComments: ReplyComment[];
+  reactions: Reaction[];
   profiles: Map<string, Profile>;
   onChange: () => void;
 }) {
