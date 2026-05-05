@@ -592,6 +592,34 @@ function ReviewItem({
     onChange();
   };
 
+  const likes = reactions.filter((r) => r.value === 1).length;
+  const dislikes = reactions.filter((r) => r.value === -1).length;
+  const myReaction = user ? reactions.find((r) => r.user_id === user.id) ?? null : null;
+
+  const react = async (value: 1 | -1) => {
+    if (!user) return toast.error("Inicia sesión para reaccionar");
+    if (myReaction?.value === value) {
+      const { error } = await supabase.from("review_reactions").delete().eq("id", myReaction.id);
+      if (error) return toast.error(error.message);
+    } else if (myReaction) {
+      const { error } = await supabase
+        .from("review_reactions")
+        .update({ value })
+        .eq("id", myReaction.id);
+      if (error) return toast.error(error.message);
+    } else {
+      const { error } = await supabase.from("review_reactions").insert({
+        review_id: review.id,
+        user_id: user.id,
+        value,
+      });
+      if (error) return toast.error(error.message);
+    }
+    onChange();
+  };
+
+  const isOwnReview = user?.id === review.author_id;
+
   return (
     <li className="rounded-2xl border border-border bg-card p-5 shadow-[var(--shadow-card)]">
       <div className="flex items-start gap-3">
@@ -614,7 +642,29 @@ function ReviewItem({
           </div>
           <p className="mt-2 whitespace-pre-line text-foreground/90">{review.body}</p>
 
-          <div className="mt-3 flex items-center gap-2">
+          <div className="mt-3 flex flex-wrap items-center gap-1">
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isOwnReview}
+              onClick={() => react(1)}
+              className={`h-7 gap-1 text-xs ${myReaction?.value === 1 ? "text-primary" : ""}`}
+              aria-label="Me gusta"
+            >
+              <ThumbsUp className={`h-3.5 w-3.5 ${myReaction?.value === 1 ? "fill-current" : ""}`} />
+              {likes}
+            </Button>
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isOwnReview}
+              onClick={() => react(-1)}
+              className={`h-7 gap-1 text-xs ${myReaction?.value === -1 ? "text-destructive" : ""}`}
+              aria-label="No me gusta"
+            >
+              <ThumbsDown className={`h-3.5 w-3.5 ${myReaction?.value === -1 ? "fill-current" : ""}`} />
+              {dislikes}
+            </Button>
             {user && (
               <Button
                 variant="ghost"
