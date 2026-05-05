@@ -902,7 +902,29 @@ function OwnerReplyBlock({
               </div>
               <p className="mt-1.5 whitespace-pre-line text-sm text-foreground/90">{reply.body}</p>
 
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={user?.id === reply.author_id}
+                  onClick={() => reactReply(1)}
+                  className={`h-7 gap-1 text-xs ${myReplyReaction?.value === 1 ? "text-primary" : ""}`}
+                  aria-label="Me gusta"
+                >
+                  <ThumbsUp className={`h-3.5 w-3.5 ${myReplyReaction?.value === 1 ? "fill-current" : ""}`} />
+                  {replyLikes}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={user?.id === reply.author_id}
+                  onClick={() => reactReply(-1)}
+                  className={`h-7 gap-1 text-xs ${myReplyReaction?.value === -1 ? "text-destructive" : ""}`}
+                  aria-label="No me gusta"
+                >
+                  <ThumbsDown className={`h-3.5 w-3.5 ${myReplyReaction?.value === -1 ? "fill-current" : ""}`} />
+                  {replyDislikes}
+                </Button>
                 {user && (
                   <Button
                     variant="ghost"
@@ -914,6 +936,7 @@ function OwnerReplyBlock({
                     Comentar
                   </Button>
                 )}
+                <ReportButton targetType="comment" targetId={reply.id} />
                 {isOwner && user?.id === reply.author_id && (
                   <>
                     <Button
