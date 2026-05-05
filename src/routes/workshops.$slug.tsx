@@ -122,6 +122,13 @@ type Reaction = {
   value: number;
 };
 
+type ReplyReaction = {
+  id: string;
+  reply_id: string;
+  user_id: string;
+  value: number;
+};
+
 const reviewSchema = z.object({
   rating: z.number().int().min(1).max(5),
   service_type: z.string().trim().max(40).optional().or(z.literal("")),
@@ -139,6 +146,7 @@ function WorkshopDetail() {
   const [replies, setReplies] = useState<Reply[]>([]);
   const [replyComments, setReplyComments] = useState<ReplyComment[]>([]);
   const [reactions, setReactions] = useState<Reaction[]>([]);
+  const [replyReactions, setReplyReactions] = useState<ReplyReaction[]>([]);
   const [profiles, setProfiles] = useState<Map<string, Profile>>(new Map());
   const [loading, setLoading] = useState(true);
   const [lightboxStart, setLightboxStart] = useState<number | null>(null);
@@ -190,13 +198,25 @@ function WorkshopDetail() {
 
       const replyIds = replyList.map((r) => r.id);
       if (replyIds.length) {
-        const { data: rcs } = await supabase
-          .from("reply_comments")
-          .select("*")
-          .in("reply_id", replyIds)
-          .order("created_at", { ascending: true });
+        const [{ data: rcs }, { data: rrxs }] = await Promise.all([
+          supabase
+            .from("reply_comments")
+            .select("*")
+            .in("reply_id", replyIds)
+            .order("created_at", { ascending: true }),
+          supabase
+            .from("reply_reactions")
+            .select("*")
+            .in("reply_id", replyIds),
+        ]);
         replyCommentList = (rcs ?? []) as ReplyComment[];
+        setReplyReactions((rrxs ?? []) as ReplyReaction[]);
+      } else {
+        setReplyReactions([]);
       }
+    } else {
+      setReactions([]);
+      setReplyReactions([]);
     }
     setComments(commentList);
     setReplies(replyList);
@@ -437,6 +457,7 @@ function WorkshopDetail() {
                 reply={replies.find((rep) => rep.review_id === r.id) ?? null}
                 replyComments={replyComments}
                 reactions={reactions.filter((rx) => rx.review_id === r.id)}
+                replyReactions={replyReactions}
                 profiles={profiles}
                 onChange={loadAll}
               />
@@ -547,6 +568,7 @@ function ReviewItem({
   reply,
   replyComments,
   reactions,
+  replyReactions,
   profiles,
   onChange,
 }: {
@@ -557,6 +579,7 @@ function ReviewItem({
   reply: Reply | null;
   replyComments: ReplyComment[];
   reactions: Reaction[];
+  replyReactions: ReplyReaction[];
   profiles: Map<string, Profile>;
   onChange: () => void;
 }) {
@@ -728,6 +751,7 @@ function ReviewItem({
             isOwner={isOwner}
             reply={reply}
             replyComments={replyComments.filter((rc) => reply && rc.reply_id === reply.id)}
+            replyReactions={reply ? replyReactions.filter((rx) => rx.reply_id === reply.id) : []}
             profiles={profiles}
             onChange={onChange}
           />
@@ -743,6 +767,7 @@ function OwnerReplyBlock({
   isOwner,
   reply,
   replyComments,
+  replyReactions,
   profiles,
   onChange,
 }: {
@@ -751,6 +776,7 @@ function OwnerReplyBlock({
   isOwner: boolean;
   reply: Reply | null;
   replyComments: ReplyComment[];
+  replyReactions: ReplyReaction[];
   profiles: Map<string, Profile>;
   onChange: () => void;
 }) {
@@ -766,6 +792,32 @@ function OwnerReplyBlock({
   }, [reply]);
 
   const author = reply ? profiles.get(reply.author_id) : null;
+
+  const replyLikes = replyReactions.filter((r) => r.value === 1).length;
+  const replyDislikes = replyReactions.filter((r) => r.value === -1).length;
+  const myReplyReaction = user ? replyReactions.find((r) => r.user_id === user.id) ?? null : null;
+
+  const reactReply = async (value: 1 | -1) => {
+    if (!user || !reply) return toast.error("Inicia sesión para reaccionar");
+    if (myReplyReaction?.value === value) {
+      const { error } = await supabase.from("reply_reactions").delete().eq("id", myReplyReaction.id);
+      if (error) return toast.error(error.message);
+    } else if (myReplyReaction) {
+      const { error } = await supabase
+        .from("reply_reactions")
+        .update({ value })
+        .eq("id", myReplyReaction.id);
+      if (error) return toast.error(error.message);
+    } else {
+      const { error } = await supabase.from("reply_reactions").insert({
+        reply_id: reply.id,
+        user_id: user.id,
+        value,
+      });
+      if (error) return toast.error(error.message);
+    }
+    onChange();
+  };
 
   const saveReply = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -850,7 +902,29 @@ function OwnerReplyBlock({
               </div>
               <p className="mt-1.5 whitespace-pre-line text-sm text-foreground/90">{reply.body}</p>
 
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={user?.id === reply.author_id}
+                  onClick={() => reactReply(1)}
+                  className={`h-7 gap-1 text-xs ${myReplyReaction?.value === 1 ? "text-primary" : ""}`}
+                  aria-label="Me gusta"
+                >
+                  <ThumbsUp className={`h-3.5 w-3.5 ${myReplyReaction?.value === 1 ? "fill-current" : ""}`} />
+                  {replyLikes}
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  disabled={user?.id === reply.author_id}
+                  onClick={() => reactReply(-1)}
+                  className={`h-7 gap-1 text-xs ${myReplyReaction?.value === -1 ? "text-destructive" : ""}`}
+                  aria-label="No me gusta"
+                >
+                  <ThumbsDown className={`h-3.5 w-3.5 ${myReplyReaction?.value === -1 ? "fill-current" : ""}`} />
+                  {replyDislikes}
+                </Button>
                 {user && (
                   <Button
                     variant="ghost"
@@ -862,6 +936,7 @@ function OwnerReplyBlock({
                     Comentar
                   </Button>
                 )}
+                <ReportButton targetType="comment" targetId={reply.id} />
                 {isOwner && user?.id === reply.author_id && (
                   <>
                     <Button
