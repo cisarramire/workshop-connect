@@ -436,6 +436,7 @@ function WorkshopDetail() {
                 comments={comments.filter((c) => c.review_id === r.id)}
                 reply={replies.find((rep) => rep.review_id === r.id) ?? null}
                 replyComments={replyComments}
+                reactions={reactions.filter((rx) => rx.review_id === r.id)}
                 profiles={profiles}
                 onChange={loadAll}
               />
