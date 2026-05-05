@@ -121,6 +121,30 @@ export type Database = {
           },
         ]
       }
+      review_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          review_id: string
+          user_id: string
+          value: number
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          review_id: string
+          user_id: string
+          value: number
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          review_id?: string
+          user_id?: string
+          value?: number
+        }
+        Relationships: []
+      }
       review_replies: {
         Row: {
           author_id: string
