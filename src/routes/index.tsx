@@ -173,7 +173,12 @@ function Home() {
           </div>
 
           <div className="lg:max-w-md lg:justify-self-end">
-            <CityMiniMap onCityDetected={handleCityDetected} />
+            <CityMiniMap
+              onCityDetected={handleCityDetected}
+              workshops={workshops
+                .filter((w) => w.lat != null && w.lon != null)
+                .map((w) => ({ id: w.id, name: w.name, slug: w.slug, lat: w.lat as number, lon: w.lon as number }))}
+            />
           </div>
         </div>
       </section>
