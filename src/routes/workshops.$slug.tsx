@@ -76,6 +76,8 @@ type Workshop = {
   photo_url: string | null;
   photos: string[];
   specialties: string[];
+  lat: number | null;
+  lon: number | null;
 };
 
 type Profile = { id: string; display_name: string; avatar_url: string | null };
