@@ -52,7 +52,7 @@ function Home() {
     (async () => {
       const { data: ws } = await supabase
         .from("workshops")
-        .select("id,name,slug,city,description,photo_url,specialties,created_at")
+        .select("id,name,slug,city,description,photo_url,specialties,created_at,lat,lon")
         .order("created_at", { ascending: false });
 
       if (!ws || cancelled) {
