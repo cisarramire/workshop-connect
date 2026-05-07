@@ -28,6 +28,8 @@ type WorkshopRow = {
   photo_url: string | null;
   specialties: string[];
   created_at: string;
+  lat: number | null;
+  lon: number | null;
 };
 
 type WorkshopWithStats = WorkshopRow & {
