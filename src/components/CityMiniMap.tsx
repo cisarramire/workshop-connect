@@ -170,6 +170,22 @@ export function CityMiniMap({ onCityDetected, workshops = [] }: Props) {
             >
               <bits.Popup>Estás aquí</bits.Popup>
             </bits.Marker>
+            {workshopIcon &&
+              workshops
+                .filter((w) => Number.isFinite(w.lat) && Number.isFinite(w.lon))
+                .map((w) => (
+                  <bits.Marker
+                    key={w.id}
+                    position={[w.lat, w.lon]}
+                    icon={workshopIcon as InstanceType<typeof bits.icon>}
+                  >
+                    <bits.Popup>
+                      <a href={`/workshops/${w.slug}`} className="font-medium text-primary underline">
+                        {w.name}
+                      </a>
+                    </bits.Popup>
+                  </bits.Marker>
+                ))}
           </bits.MapContainer>
         ) : (
           <div className="flex h-full items-center justify-center bg-muted">
