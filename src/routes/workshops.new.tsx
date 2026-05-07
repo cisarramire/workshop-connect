@@ -194,9 +194,10 @@ function NewWorkshop() {
           <AddressMapPicker
             address={address}
             city={city}
-            onChange={({ address: a, city: c }) => {
+            onChange={({ address: a, city: c, coords: co }) => {
               setAddress(a);
               if (c) setCity(c);
+              setCoords(co);
             }}
           />
         </div>
