@@ -48,6 +48,7 @@ function NewWorkshop() {
   const [name, setName] = useState("");
   const [city, setCity] = useState("");
   const [address, setAddress] = useState("");
+  const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [specialties, setSpecialties] = useState<string[]>([]);
   const [photos, setPhotos] = useState<File[]>([]);
   const [photoPreviews, setPhotoPreviews] = useState<string[]>([]);
@@ -144,6 +145,8 @@ function NewWorkshop() {
         photo_url,
         photos: uploaded,
         specialties,
+        lat: coords?.lat ?? null,
+        lon: coords?.lon ?? null,
       });
       if (error) throw error;
 
@@ -193,9 +196,10 @@ function NewWorkshop() {
           <AddressMapPicker
             address={address}
             city={city}
-            onChange={({ address: a, city: c }) => {
+            onChange={({ address: a, city: c, coords: co }) => {
               setAddress(a);
               if (c) setCity(c);
+              setCoords(co);
             }}
           />
         </div>

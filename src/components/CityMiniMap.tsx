@@ -6,6 +6,7 @@ type Status = "idle" | "loading" | "granted" | "denied";
 
 type Props = {
   onCityDetected?: (city: string) => void;
+  workshops?: Array<{ id: string; name: string; slug: string; lat: number; lon: number }>;
 };
 
 // Lazy-loaded react-leaflet bits live here so SSR is happy.
@@ -17,13 +18,14 @@ type LeafletBits = {
   icon: typeof import("leaflet").Icon;
 };
 
-export function CityMiniMap({ onCityDetected }: Props) {
+export function CityMiniMap({ onCityDetected, workshops = [] }: Props) {
   const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
   const [city, setCity] = useState<string | null>(null);
   const [bits, setBits] = useState<LeafletBits | null>(null);
   const [defaultIcon, setDefaultIcon] = useState<unknown>(null);
+  const [workshopIcon, setWorkshopIcon] = useState<unknown>(null);
 
   useEffect(() => {
     setMounted(true);
@@ -52,6 +54,14 @@ export function CityMiniMap({ onCityDetected }: Props) {
         shadowSize: [41, 41],
       });
       setDefaultIcon(icon);
+      // Workshop pin: use a colored divIcon so it stands out from the user pin
+      const wIcon = (L as typeof import("leaflet")).divIcon({
+        className: "",
+        html: `<div style="background:hsl(var(--primary,221 83% 53%));width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      });
+      setWorkshopIcon(wIcon);
       setBits({
         MapContainer: rl.MapContainer,
         TileLayer: rl.TileLayer,
@@ -169,6 +179,23 @@ export function CityMiniMap({ onCityDetected }: Props) {
             >
               <bits.Popup>Estás aquí</bits.Popup>
             </bits.Marker>
+            {workshopIcon ? (<>
+              {workshops
+                .filter((w) => Number.isFinite(w.lat) && Number.isFinite(w.lon))
+                .map((w) => (
+                  <bits.Marker
+                    key={w.id}
+                    position={[w.lat, w.lon]}
+                    icon={workshopIcon as InstanceType<typeof bits.icon>}
+                  >
+                    <bits.Popup>
+                      <a href={`/workshops/${w.slug}`} className="font-medium text-primary underline">
+                        {w.name}
+                      </a>
+                    </bits.Popup>
+                  </bits.Marker>
+                ))}
+            </>) : null}
           </bits.MapContainer>
         ) : (
           <div className="flex h-full items-center justify-center bg-muted">

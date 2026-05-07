@@ -28,6 +28,8 @@ type WorkshopRow = {
   photo_url: string | null;
   specialties: string[];
   created_at: string;
+  lat: number | null;
+  lon: number | null;
 };
 
 type WorkshopWithStats = WorkshopRow & {
@@ -50,7 +52,7 @@ function Home() {
     (async () => {
       const { data: ws } = await supabase
         .from("workshops")
-        .select("id,name,slug,city,description,photo_url,specialties,created_at")
+        .select("id,name,slug,city,description,photo_url,specialties,created_at,lat,lon")
         .order("created_at", { ascending: false });
 
       if (!ws || cancelled) {
@@ -171,7 +173,12 @@ function Home() {
           </div>
 
           <div className="lg:max-w-md lg:justify-self-end">
-            <CityMiniMap onCityDetected={handleCityDetected} />
+            <CityMiniMap
+              onCityDetected={handleCityDetected}
+              workshops={workshops
+                .filter((w) => w.lat != null && w.lon != null)
+                .map((w) => ({ id: w.id, name: w.name, slug: w.slug, lat: w.lat as number, lon: w.lon as number }))}
+            />
           </div>
         </div>
       </section>
