@@ -171,8 +171,8 @@ export function CityMiniMap({ onCityDetected, workshops = [] }: Props) {
             >
               <bits.Popup>Estás aquí</bits.Popup>
             </bits.Marker>
-            {workshopIcon &&
-              workshops
+            {workshopIcon ? (<>
+              {workshops
                 .filter((w) => Number.isFinite(w.lat) && Number.isFinite(w.lon))
                 .map((w) => (
                   <bits.Marker
