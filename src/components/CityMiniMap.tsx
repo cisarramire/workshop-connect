@@ -18,7 +18,7 @@ type LeafletBits = {
   icon: typeof import("leaflet").Icon;
 };
 
-export function CityMiniMap({ onCityDetected }: Props) {
+export function CityMiniMap({ onCityDetected, workshops = [] }: Props) {
   const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<Status>("idle");
   const [coords, setCoords] = useState<{ lat: number; lon: number } | null>(null);
