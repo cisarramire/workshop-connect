@@ -54,6 +54,14 @@ export function CityMiniMap({ onCityDetected, workshops = [] }: Props) {
         shadowSize: [41, 41],
       });
       setDefaultIcon(icon);
+      // Workshop pin: use a colored divIcon so it stands out from the user pin
+      const wIcon = (L as typeof import("leaflet")).divIcon({
+        className: "",
+        html: `<div style="background:hsl(var(--primary,221 83% 53%));width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
+        iconSize: [18, 18],
+        iconAnchor: [9, 9],
+      });
+      setWorkshopIcon(wIcon);
       setBits({
         MapContainer: rl.MapContainer,
         TileLayer: rl.TileLayer,
