@@ -187,6 +187,7 @@ export function CityMiniMap({ onCityDetected, workshops = [] }: Props) {
                     </bits.Popup>
                   </bits.Marker>
                 ))}
+            </>) : null}
           </bits.MapContainer>
         ) : (
           <div className="flex h-full items-center justify-center bg-muted">
