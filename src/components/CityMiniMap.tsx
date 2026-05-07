@@ -25,6 +25,7 @@ export function CityMiniMap({ onCityDetected, workshops = [] }: Props) {
   const [city, setCity] = useState<string | null>(null);
   const [bits, setBits] = useState<LeafletBits | null>(null);
   const [defaultIcon, setDefaultIcon] = useState<unknown>(null);
+  const [workshopIcon, setWorkshopIcon] = useState<unknown>(null);
 
   useEffect(() => {
     setMounted(true);
