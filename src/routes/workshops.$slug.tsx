@@ -370,11 +370,8 @@ function WorkshopDetail() {
               <ReportButton targetType="workshop" targetId={workshop.id} />
             </div>
           </div>
-          {workshop.lat != null && workshop.lon != null && (
-            <div className="md:col-start-2">
-              <WorkshopLocationMap lat={workshop.lat} lon={workshop.lon} name={workshop.name} />
-            </div>
-          )}
+          <div className="space-y-4">
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] md-extra"></div>
 
           <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
             {gallery.length > 0 ? (
