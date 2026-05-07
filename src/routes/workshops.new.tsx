@@ -145,6 +145,8 @@ function NewWorkshop() {
         photo_url,
         photos: uploaded,
         specialties,
+        lat: coords?.lat ?? null,
+        lon: coords?.lon ?? null,
       });
       if (error) throw error;
 
