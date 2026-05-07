@@ -6,6 +6,7 @@ type Status = "idle" | "loading" | "granted" | "denied";
 
 type Props = {
   onCityDetected?: (city: string) => void;
+  workshops?: Array<{ id: string; name: string; slug: string; lat: number; lon: number }>;
 };
 
 // Lazy-loaded react-leaflet bits live here so SSR is happy.
