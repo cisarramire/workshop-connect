@@ -57,9 +57,10 @@ export function CityMiniMap({ onCityDetected, workshops = [] }: Props) {
       // Workshop pin: use a colored divIcon so it stands out from the user pin
       const wIcon = (L as typeof import("leaflet")).divIcon({
         className: "",
-        html: `<div style="background:hsl(var(--primary,221 83% 53%));width:18px;height:18px;border-radius:50%;border:3px solid white;box-shadow:0 1px 4px rgba(0,0,0,.4)"></div>`,
-        iconSize: [18, 18],
-        iconAnchor: [9, 9],
+        html: `<div style="position:relative;width:30px;height:38px;filter:drop-shadow(0 2px 3px rgba(0,0,0,.35))"><svg viewBox="0 0 30 38" width="30" height="38" xmlns="http://www.w3.org/2000/svg"><path d="M15 0C6.7 0 0 6.7 0 15c0 11 15 23 15 23s15-12 15-23C30 6.7 23.3 0 15 0z" fill="hsl(24 95% 53%)"/><circle cx="15" cy="15" r="6" fill="white"/><path d="M12 13l3-2 3 2v4l-3 2-3-2z" fill="hsl(24 95% 53%)"/></svg></div>`,
+        iconSize: [30, 38],
+        iconAnchor: [15, 38],
+        popupAnchor: [0, -34],
       });
       setWorkshopIcon(wIcon);
       setBits({
