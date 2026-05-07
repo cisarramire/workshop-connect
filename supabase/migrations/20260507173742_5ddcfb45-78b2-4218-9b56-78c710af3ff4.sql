@@ -1,0 +1,1 @@
+ALTER TABLE public.workshops ADD COLUMN lat double precision, ADD COLUMN lon double precision;
