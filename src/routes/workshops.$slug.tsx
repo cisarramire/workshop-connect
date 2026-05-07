@@ -371,58 +371,60 @@ function WorkshopDetail() {
             </div>
           </div>
           <div className="space-y-4">
-            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)] md-extra"></div>
-
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
-            {gallery.length > 0 ? (
-              <button
-                type="button"
-                onClick={() => setLightboxStart(0)}
-                className="block w-full focus:outline-none focus:ring-2 focus:ring-primary"
-                aria-label="Abrir galería de fotos"
-              >
-                <img
-                  src={gallery[0]}
-                  alt={workshop.name}
-                  className="h-full w-full cursor-zoom-in object-cover transition-transform duration-300 hover:scale-[1.02]"
-                />
-              </button>
-            ) : (
-              <div className="flex aspect-[4/3] items-center justify-center bg-accent text-primary/40">
-                <Wrench className="h-20 w-20" />
-              </div>
-            )}
-            {gallery.length > 1 && (
-              <div className="border-t border-border p-3">
-                <PhotoGallery photos={gallery} alt={workshop.name} onOpen={(i) => setLightboxStart(i)} />
-              </div>
-            )}
-            {stats.count > 0 && (
-              <div className="space-y-1.5 border-t border-border p-5">
-                {[5, 4, 3, 2, 1].map((n) => {
-                  const c = stats.breakdown[n - 1];
-                  const pct = stats.count ? (c / stats.count) * 100 : 0;
-                  return (
-                    <div key={n} className="flex items-center gap-2 text-xs">
-                      <span className="w-3 font-medium">{n}</span>
-                      <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
-                        <div className="h-full bg-[var(--rating)]" style={{ width: `${pct}%` }} />
+            <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-[var(--shadow-card)]">
+              {gallery.length > 0 ? (
+                <button
+                  type="button"
+                  onClick={() => setLightboxStart(0)}
+                  className="block w-full focus:outline-none focus:ring-2 focus:ring-primary"
+                  aria-label="Abrir galería de fotos"
+                >
+                  <img
+                    src={gallery[0]}
+                    alt={workshop.name}
+                    className="h-full w-full cursor-zoom-in object-cover transition-transform duration-300 hover:scale-[1.02]"
+                  />
+                </button>
+              ) : (
+                <div className="flex aspect-[4/3] items-center justify-center bg-accent text-primary/40">
+                  <Wrench className="h-20 w-20" />
+                </div>
+              )}
+              {gallery.length > 1 && (
+                <div className="border-t border-border p-3">
+                  <PhotoGallery photos={gallery} alt={workshop.name} onOpen={(i) => setLightboxStart(i)} />
+                </div>
+              )}
+              {stats.count > 0 && (
+                <div className="space-y-1.5 border-t border-border p-5">
+                  {[5, 4, 3, 2, 1].map((n) => {
+                    const c = stats.breakdown[n - 1];
+                    const pct = stats.count ? (c / stats.count) * 100 : 0;
+                    return (
+                      <div key={n} className="flex items-center gap-2 text-xs">
+                        <span className="w-3 font-medium">{n}</span>
+                        <div className="h-2 flex-1 overflow-hidden rounded-full bg-muted">
+                          <div className="h-full bg-[var(--rating)]" style={{ width: `${pct}%` }} />
+                        </div>
+                        <span className="w-6 text-right text-muted-foreground">{c}</span>
                       </div>
-                      <span className="w-6 text-right text-muted-foreground">{c}</span>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+            {workshop.lat != null && workshop.lon != null && (
+              <WorkshopLocationMap lat={workshop.lat} lon={workshop.lon} name={workshop.name} />
+            )}
+            {lightboxStart !== null && (
+              <Lightbox
+                photos={gallery}
+                startIndex={lightboxStart}
+                alt={workshop.name}
+                onClose={() => setLightboxStart(null)}
+              />
             )}
           </div>
-          {lightboxStart !== null && (
-            <Lightbox
-              photos={gallery}
-              startIndex={lightboxStart}
-              alt={workshop.name}
-              onClose={() => setLightboxStart(null)}
-            />
-          )}
         </div>
       </section>
 
