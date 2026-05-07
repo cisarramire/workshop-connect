@@ -24,6 +24,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { StarRating } from "@/components/StarRating";
 import { PhotoGallery, Lightbox } from "@/components/PhotoGallery";
+import { WorkshopLocationMap } from "@/components/WorkshopLocationMap";
 import {
   AlertDialog,
   AlertDialogAction,
