@@ -2,6 +2,7 @@ import { Link } from "@tanstack/react-router";
 import { Wrench, Plus, User, LogIn } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth-context";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 export function SiteHeader() {
   const { user, profile, signOut } = useAuth();
@@ -16,6 +17,7 @@ export function SiteHeader() {
           <span>MecaRate</span>
         </Link>
         <nav className="flex items-center gap-2">
+          <ThemeToggle />
           <Button asChild variant="ghost" size="sm" className="hidden sm:inline-flex">
             <Link to="/">Explorar</Link>
           </Button>
