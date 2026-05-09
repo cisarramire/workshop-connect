@@ -39,6 +39,8 @@ function MePage() {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [workshops, setWorkshops] = useState<MyWorkshop[]>([]);
   const [reviews, setReviews] = useState<MyReview[]>([]);
