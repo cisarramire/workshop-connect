@@ -3,6 +3,13 @@
 @import "tw-animate-css";
 @import "leaflet/dist/leaflet.css";
 
+/* Keep Leaflet panes/controls below the sticky site header (z-30) */
+.leaflet-pane,
+.leaflet-top,
+.leaflet-bottom { z-index: 1 !important; }
+.leaflet-popup-pane { z-index: 5 !important; }
+.leaflet-container { z-index: 0; }
+
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
