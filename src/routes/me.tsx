@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type ChangeEvent, type FormEvent } from "react";
 import { toast } from "sonner";
-import { Pencil } from "lucide-react";
+import { Camera, Loader2, Pencil } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,6 +39,8 @@ function MePage() {
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState("");
   const [busy, setBusy] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
 
   const [workshops, setWorkshops] = useState<MyWorkshop[]>([]);
   const [reviews, setReviews] = useState<MyReview[]>([]);
@@ -98,15 +100,61 @@ function MePage() {
     refreshProfile();
   };
 
+  const onAvatarChange = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (!file.type.startsWith("image/")) return toast.error("Selecciona una imagen");
+    if (file.size > 3 * 1024 * 1024) return toast.error("La imagen debe pesar menos de 3 MB");
+
+    setUploading(true);
+    const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+    const path = `${user.id}/avatar-${Date.now()}.${ext}`;
+    const { error: upErr } = await supabase.storage
+      .from("avatars")
+      .upload(path, file, { cacheControl: "3600", upsert: true, contentType: file.type });
+    if (upErr) {
+      setUploading(false);
+      return toast.error(upErr.message);
+    }
+    const { data: pub } = supabase.storage.from("avatars").getPublicUrl(path);
+    const { error: updErr } = await supabase
+      .from("profiles")
+      .update({ avatar_url: pub.publicUrl })
+      .eq("id", user.id);
+    setUploading(false);
+    if (updErr) return toast.error(updErr.message);
+    toast.success("Foto de perfil actualizada");
+    refreshProfile();
+  };
+
   return (
     <main className="container mx-auto max-w-3xl px-4 py-10">
       <div className="flex items-center gap-4">
-        <Avatar className="h-16 w-16">
-          <AvatarImage src={profile?.avatar_url ?? undefined} />
-          <AvatarFallback className="text-xl">
-            {(profile?.display_name ?? "?").slice(0, 1).toUpperCase()}
-          </AvatarFallback>
-        </Avatar>
+        <div className="relative">
+          <Avatar className="h-16 w-16">
+            <AvatarImage src={profile?.avatar_url ?? undefined} />
+            <AvatarFallback className="text-xl">
+              {(profile?.display_name ?? "?").slice(0, 1).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <button
+            type="button"
+            onClick={() => fileRef.current?.click()}
+            disabled={uploading}
+            className="absolute -bottom-1 -right-1 grid h-7 w-7 place-items-center rounded-full border border-border bg-background text-foreground shadow-sm transition-colors hover:bg-accent disabled:opacity-60"
+            aria-label="Cambiar foto de perfil"
+          >
+            {uploading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Camera className="h-3.5 w-3.5" />}
+          </button>
+          <input
+            ref={fileRef}
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={onAvatarChange}
+          />
+        </div>
         <div className="flex-1">
           {editing ? (
             <form onSubmit={saveProfile} className="flex items-end gap-2">
